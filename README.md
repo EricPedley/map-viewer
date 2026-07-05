@@ -3,6 +3,8 @@
 Offline-capable PWA for viewing the [Of Milk and Navvies](https://bikepacking.com/routes/of-milk-and-navvies/)
 bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
 
+**Live app: https://ericpedley.github.io/map-viewer/**
+
 - Route track + 65 points of interest (resupply, lodging, camping, water, sights)
   baked in from the official GPX, no network needed to see them.
 - Satellite basemap (Esri World Imagery).
