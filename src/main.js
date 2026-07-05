@@ -289,12 +289,17 @@ const btnLocate = document.getElementById('btn-locate');
 const locateStatus = document.getElementById('locate-status');
 
 const locationTracker = createLocationTracker(map, {
-  onStatus: ({ tracking, following, error }) => {
+  onStatus: ({ tracking, following, error, headingState }) => {
     btnLocate.classList.toggle('active', tracking && following);
     btnLocate.classList.toggle('stale', tracking && !following);
     if (error) {
       locateStatus.hidden = false;
       locateStatus.textContent = error;
+    } else if (tracking && headingState === 'denied') {
+      locateStatus.hidden = false;
+      locateStatus.textContent =
+        'Location is on, but compass access was denied so there\'s no heading arrow. ' +
+        'Check Settings → Safari → Motion & Orientation Access is on, then reload and tap Locate again.';
     } else {
       locateStatus.hidden = true;
     }

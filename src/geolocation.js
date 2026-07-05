@@ -24,21 +24,28 @@ function describeGeoError(err) {
 // heading via the non-standard `webkitCompassHeading` field. Other browsers
 // (desktop, most Android) need neither and expose heading via `alpha` on the
 // standard event instead.
+// Returns 'granted', 'denied' (user/OS said no to a real prompt — worth
+// telling the user how to fix it), or 'unsupported' (no compass API on this
+// device/browser at all — nothing actionable to tell them).
 async function requestOrientationPermission() {
   const DOE = window.DeviceOrientationEvent;
   if (DOE && typeof DOE.requestPermission === 'function') {
     try {
-      return (await DOE.requestPermission()) === 'granted';
+      return (await DOE.requestPermission()) === 'granted' ? 'granted' : 'denied';
     } catch {
-      return false;
+      return 'denied';
     }
   }
-  return 'DeviceOrientationEvent' in window;
+  return 'DeviceOrientationEvent' in window ? 'granted' : 'unsupported';
 }
 
 function computeHeadingFromOrientation(event) {
   if (typeof event.webkitCompassHeading === 'number') {
-    return event.webkitCompassHeading; // iOS Safari: already true-north degrees
+    // iOS reports -1 when the compass needs calibration (e.g. right after
+    // the permission prompt, before the first good reading) — not a real
+    // heading, so don't rotate the arrow to a bogus "north".
+    if (event.webkitCompassHeading < 0) return null;
+    return event.webkitCompassHeading; // otherwise already true-north degrees
   }
   if (event.absolute && typeof event.alpha === 'number') {
     const screenAngle = screen.orientation?.angle ?? window.orientation ?? 0;
@@ -54,6 +61,7 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
   let programmaticMove = false;
   let smoothedHeading = null;
   let markerAdded = false;
+  let headingState = null; // null = not asked yet, else 'granted' | 'denied' | 'unsupported'
 
   const icon = L.divIcon({
     className: 'geo-marker',
@@ -72,7 +80,7 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
   });
 
   function report(extra) {
-    onStatus?.({ tracking: watchId != null, following, ...extra });
+    onStatus?.({ tracking: watchId != null, following, headingState, ...extra });
   }
 
   function setHeading(heading) {
@@ -136,10 +144,12 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
     following = true;
     report({});
 
-    if (await requestOrientationPermission()) {
+    headingState = await requestOrientationPermission();
+    if (headingState === 'granted') {
       orientationHandler = handleOrientation;
       window.addEventListener('deviceorientation', orientationHandler);
     }
+    report({});
 
     watchId = navigator.geolocation.watchPosition(
       handlePosition,
