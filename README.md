@@ -8,9 +8,16 @@ bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
 - Route track + 65 points of interest (resupply, lodging, camping, water, sights)
   baked in from the official GPX, no network needed to see them.
 - Satellite basemap (Esri World Imagery).
-- "Download for offline" caches satellite tiles for a corridor around the
-  route at your choice of zoom levels, so the map keeps working once you
-  lose signal. Do this once before you set off, while you have wifi/data.
+- One-tap "Download offline map" caches satellite tiles for a corridor
+  around the route (overview down to street-level zoom), so the map keeps
+  working once you lose signal. Do this once before you set off, while you
+  have wifi/data.
+- Live location dot + compass heading arrow (GPS + device compass — both
+  on-device sensors, so this works with no signal too).
+- While location is on, the POI list sorts to what's coming up next and
+  shows miles until you reach it, dropping anything you've already passed.
+- Elevation chart shows percent grade (not raw elevation) so you can see
+  how steep what's ahead actually is.
 - Installable as a PWA (Add to Home Screen).
 
 ## Development
@@ -35,11 +42,12 @@ Vercel, or Cloudflare Pages.
 The service worker (configured in `vite.config.js` via `vite-plugin-pwa`)
 registers a `CacheFirst` runtime-caching route for Esri World Imagery tile
 URLs. The in-app "Offline" panel (`src/offline.js`) samples points along the
-route every 250m, computes the map tiles needed to cover a corridor around
-those points at the selected zoom levels, and fetches each one — the service
-worker transparently persists them into the same cache Leaflet reads from
-when panning the map. There's no separate offline data format to manage:
-online panning and offline pre-fetching both go through the same cache.
+route every 200m, computes the map tiles needed to cover a corridor around
+those points at a fixed zoom range (z12-16), and fetches each one — the
+service worker transparently persists them into the same cache Leaflet
+reads from when panning the map. There's no separate offline data format to
+manage: online panning and offline pre-fetching both go through the same
+cache.
 
 Note on Esri World Imagery: it's used here because it requires no API key
 and gives the best available resolution for route-planning purposes. Their
