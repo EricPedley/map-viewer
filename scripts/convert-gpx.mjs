@@ -1,6 +1,6 @@
 // Converts the source GPX route into a compact JSON file bundled into the app,
 // so the track/POIs are available offline without a runtime fetch or GPX parser.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { DOMParser } from '@xmldom/xmldom';
@@ -78,6 +78,7 @@ const data = {
   pois,
 };
 
+mkdirSync(path.dirname(outPath), { recursive: true });
 writeFileSync(outPath, JSON.stringify(data));
 console.log(
   `Wrote ${outPath}: ${track.length} track points, ${pois.length} POIs, ` +
