@@ -197,6 +197,14 @@ html, body {
 
 #poi-list li:hover { background: rgba(255, 255, 255, 0.04); }
 
+.poi-name { flex: 1 1 auto; }
+.poi-dist {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .poi-icon span {
   display: flex;
   align-items: center;
@@ -224,6 +232,7 @@ html, body {
 .elevation-area { fill: rgba(255, 90, 31, 0.18); stroke: none; }
 .elevation-line { fill: none; stroke: var(--accent); stroke-width: 2; }
 .elevation-cursor { stroke: #fff; stroke-width: 1; stroke-dasharray: 3 3; }
+.elevation-zero { stroke: var(--border); stroke-width: 1; }
 .elevation-label { fill: var(--muted); font-size: 10px; }
 .elevation-readout {
   font-size: 13px;

@@ -12,6 +12,7 @@ import {
 } from './offline.js';
 import { renderElevationProfile } from './elevation.js';
 import { createLocationTracker } from './geolocation.js';
+import { nearestRouteDistanceMeters, metersToMiles } from './projection.js';
 
 // ---------- Map setup ----------
 const map = L.map('map', { zoomControl: false, attributionControl: true });
@@ -49,6 +50,13 @@ const poiMarkers = routeData.pois.map((poi) => {
   marker.addTo(map);
   return marker;
 });
+
+// Where each POI falls along the route, in meters from the start — computed
+// once since POIs don't move, then reused to sort/filter the POI list
+// against the rider's live position.
+const poiRouteDistance = routeData.pois.map((poi) =>
+  nearestRouteDistanceMeters(routeData.track, routeData.distances, poi.lat, poi.lon)
+);
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -101,7 +109,12 @@ document.querySelectorAll('.panel-close').forEach((btn) => {
 // ---------- POI list & filters ----------
 const poiList = document.getElementById('poi-list');
 const poiFilters = document.getElementById('poi-filters');
+const poiSubtitle = document.getElementById('poi-subtitle');
 const activeCategories = new Set(allCategories().map((c) => c.id));
+
+// Set from the location tracker's onPosition callback; null while location
+// tracking is off, in which case the list just shows the whole route in order.
+let currentMileageMeters = null;
 
 function renderPoiFilters() {
   poiFilters.innerHTML = '';
@@ -134,27 +147,46 @@ function applyFilters() {
 
 function renderPoiListItems() {
   poiList.innerHTML = '';
-  routeData.pois.forEach((poi, i) => {
-    const cat = categorize(poi.name);
-    if (!activeCategories.has(cat.id)) return;
+
+  const tracking = currentMileageMeters != null;
+  if (tracking) {
+    const mi = metersToMiles(currentMileageMeters).toFixed(1);
+    const total = metersToMiles(routeData.totalDistanceMeters).toFixed(1);
+    poiSubtitle.textContent = `You're at mile ${mi} of ${total} — showing what's ahead`;
+  } else {
+    poiSubtitle.textContent = 'Sorted by route order, start to finish';
+  }
+
+  const rows = routeData.pois
+    .map((poi, i) => ({ poi, i, cat: categorize(poi.name), dist: poiRouteDistance[i] }))
+    .filter((row) => activeCategories.has(row.cat.id))
+    .filter((row) => !tracking || row.dist >= currentMileageMeters)
+    .sort((a, b) => a.dist - b.dist);
+
+  for (const { poi, i, cat, dist } of rows) {
     const li = document.createElement('li');
-    li.innerHTML = `<span class="poi-emoji">${cat.emoji}</span> <span>${escapeHtml(poi.name)}</span>`;
+    const distLabel = tracking
+      ? `${metersToMiles(dist - currentMileageMeters).toFixed(1)} mi`
+      : `mile ${metersToMiles(dist).toFixed(1)}`;
+    li.innerHTML =
+      `<span class="poi-emoji">${cat.emoji}</span> <span class="poi-name">${escapeHtml(poi.name)}</span>` +
+      `<span class="poi-dist">${distLabel}</span>`;
     li.addEventListener('click', () => {
       map.setView([poi.lat, poi.lon], 15);
       poiMarkers[i].openPopup();
       closeAllPanels();
     });
     poiList.appendChild(li);
-  });
+  }
 }
 
 renderPoiFilters();
 renderPoiListItems();
 
 // ---------- Elevation profile ----------
-const km = (routeData.totalDistanceMeters / 1000).toFixed(1);
+const totalMiles = metersToMiles(routeData.totalDistanceMeters).toFixed(1);
 document.getElementById('route-stats').textContent =
-  `${km} km · +${routeData.elevationGainMeters}m / -${routeData.elevationLossMeters}m`;
+  `${totalMiles} mi · +${routeData.elevationGainMeters}m / -${routeData.elevationLossMeters}m`;
 
 renderElevationProfile(document.getElementById('elevation-chart'), {
   track: routeData.track,
@@ -235,7 +267,7 @@ btnDownload.addEventListener('click', () => {
     if (!cancelled) {
       localStorage.setItem(
         'offlineDownloadMeta',
-        JSON.stringify({ timestamp: Date.now(), zooms, tileCount: tiles.length, failed })
+        JSON.stringify({ timestamp: Date.now(), zooms: OFFLINE_ZOOMS, tileCount: tiles.length, failed })
       );
     }
     refreshCacheStatus();
@@ -266,6 +298,14 @@ const locationTracker = createLocationTracker(map, {
     } else {
       locateStatus.hidden = true;
     }
+    if (!tracking && currentMileageMeters != null) {
+      currentMileageMeters = null;
+      renderPoiListItems();
+    }
+  },
+  onPosition: ({ lat, lon }) => {
+    currentMileageMeters = nearestRouteDistanceMeters(routeData.track, routeData.distances, lat, lon);
+    renderPoiListItems();
   },
 });
 

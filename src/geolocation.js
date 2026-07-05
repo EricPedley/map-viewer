@@ -47,7 +47,7 @@ function computeHeadingFromOrientation(event) {
   return null;
 }
 
-export function createLocationTracker(map, { onStatus } = {}) {
+export function createLocationTracker(map, { onStatus, onPosition } = {}) {
   let watchId = null;
   let orientationHandler = null;
   let following = false;
@@ -114,6 +114,7 @@ export function createLocationTracker(map, { onStatus } = {}) {
       map.setView(latlng, Math.max(map.getZoom(), 15), { animate: true });
     }
     report({ error: null });
+    onPosition?.({ lat: latitude, lon: longitude, accuracy });
   }
 
   map.on('movestart', () => {
