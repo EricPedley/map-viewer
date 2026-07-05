@@ -7,7 +7,6 @@
     <meta name="description" content="Offline map viewer for the Of Milk and Navvies bikepacking route (Mjølkevegen and Rallarvegen, Norway)." />
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icons/icon-180.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
     <title>Of Milk and Navvies — Offline Map</title>
   </head>
   <body>
@@ -17,8 +16,11 @@
       <button id="btn-pois" class="chip" aria-label="Points of interest">📍 POIs</button>
       <button id="btn-elevation" class="chip" aria-label="Elevation profile">⛰️ Elevation</button>
       <button id="btn-offline" class="chip" aria-label="Offline downloads">⬇️ Offline</button>
-      <span id="install-hint" class="chip chip-muted" hidden>Install this app: browser menu → "Add to Home Screen"</span>
+      <button id="btn-locate" class="chip" aria-label="Show my location">🧭 Locate</button>
+      <span id="install-hint" class="chip chip-muted" hidden></span>
     </div>
+
+    <div id="locate-status" class="toast" hidden></div>
 
     <div id="panel-pois" class="panel" hidden>
       <div class="panel-header">
@@ -43,21 +45,13 @@
         <button class="panel-close" data-close="panel-offline">✕</button>
       </div>
       <p class="panel-note">
-        Downloads satellite imagery for a corridor around the route so the map works with
-        no signal. Do this once while you have wifi/signal, before you leave.
+        Downloads satellite imagery for a corridor around the route (overview down to
+        street-level detail) so the map works with no signal. Do this once while you
+        have wifi, before you leave — it's about 175 MB.
       </p>
-      <div class="field">
-        <label>Detail level (zoom)</label>
-        <div id="zoom-checks" class="zoom-checks"></div>
-      </div>
-      <div class="field">
-        <label for="buffer-range">Corridor width: <span id="buffer-value"></span></label>
-        <input type="range" id="buffer-range" min="0" max="3" value="1" step="1" />
-      </div>
       <div id="offline-status" class="offline-status"></div>
       <div class="offline-actions">
-        <button id="btn-estimate">Estimate size</button>
-        <button id="btn-download" class="primary">Download</button>
+        <button id="btn-download" class="primary">Download offline map</button>
         <button id="btn-cancel" hidden>Cancel</button>
         <button id="btn-clear-cache" class="danger">Clear cache</button>
       </div>

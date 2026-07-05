@@ -1,0 +1,181 @@
+import L from 'leaflet';
+
+// Both the GPS fix and the compass are on-device hardware (no network calls),
+// so this works fully offline — that's not something we had to build for,
+// it's just how these browser APIs work.
+
+const HEADING_SMOOTHING = 0.25; // low-pass filter so the heading arrow doesn't jitter
+
+function describeGeoError(err) {
+  switch (err.code) {
+    case err.PERMISSION_DENIED:
+      return 'Location permission denied. Enable it in Settings → Privacy → Location Services → Safari (or Settings → [this app] if installed to your Home Screen).';
+    case err.POSITION_UNAVAILABLE:
+      return 'Location unavailable right now.';
+    case err.TIMEOUT:
+      return 'Timed out getting your location — try again in the open.';
+    default:
+      return 'Could not get your location.';
+  }
+}
+
+// iOS Safari (13+) gates DeviceOrientationEvent behind an explicit,
+// user-gesture-triggered permission prompt, and only exposes a true compass
+// heading via the non-standard `webkitCompassHeading` field. Other browsers
+// (desktop, most Android) need neither and expose heading via `alpha` on the
+// standard event instead.
+async function requestOrientationPermission() {
+  const DOE = window.DeviceOrientationEvent;
+  if (DOE && typeof DOE.requestPermission === 'function') {
+    try {
+      return (await DOE.requestPermission()) === 'granted';
+    } catch {
+      return false;
+    }
+  }
+  return 'DeviceOrientationEvent' in window;
+}
+
+function computeHeadingFromOrientation(event) {
+  if (typeof event.webkitCompassHeading === 'number') {
+    return event.webkitCompassHeading; // iOS Safari: already true-north degrees
+  }
+  if (event.absolute && typeof event.alpha === 'number') {
+    const screenAngle = screen.orientation?.angle ?? window.orientation ?? 0;
+    return (360 - event.alpha + screenAngle) % 360;
+  }
+  return null;
+}
+
+export function createLocationTracker(map, { onStatus } = {}) {
+  let watchId = null;
+  let orientationHandler = null;
+  let following = false;
+  let programmaticMove = false;
+  let smoothedHeading = null;
+  let markerAdded = false;
+
+  const icon = L.divIcon({
+    className: 'geo-marker',
+    html: '<div class="geo-heading"></div><div class="geo-dot"></div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+  });
+  const marker = L.marker([0, 0], { icon, zIndexOffset: 1000, interactive: false });
+  const accuracyCircle = L.circle([0, 0], {
+    radius: 0,
+    color: '#2b83ff',
+    weight: 1,
+    fillColor: '#2b83ff',
+    fillOpacity: 0.12,
+    interactive: false,
+  });
+
+  function report(extra) {
+    onStatus?.({ tracking: watchId != null, following, ...extra });
+  }
+
+  function setHeading(heading) {
+    if (heading == null) return;
+    if (smoothedHeading == null) {
+      smoothedHeading = heading;
+    } else {
+      const delta = ((heading - smoothedHeading + 540) % 360) - 180;
+      smoothedHeading = (smoothedHeading + delta * HEADING_SMOOTHING + 360) % 360;
+    }
+    const el = marker.getElement()?.querySelector('.geo-heading');
+    if (el) {
+      el.style.display = '';
+      el.style.transform = `rotate(${smoothedHeading}deg)`;
+    }
+  }
+
+  function handleOrientation(event) {
+    setHeading(computeHeadingFromOrientation(event));
+  }
+
+  function handlePosition(pos) {
+    const { latitude, longitude, accuracy, heading } = pos.coords;
+    const latlng = [latitude, longitude];
+    marker.setLatLng(latlng);
+    accuracyCircle.setLatLng(latlng);
+    accuracyCircle.setRadius(accuracy || 0);
+    if (!markerAdded) {
+      marker.addTo(map);
+      accuracyCircle.addTo(map);
+      markerAdded = true;
+    }
+    // GPS course-over-ground only exists while moving, and only matters as a
+    // fallback when there's no live compass reading.
+    if (heading != null && !orientationHandler) setHeading(heading);
+
+    if (following) {
+      programmaticMove = true;
+      map.setView(latlng, Math.max(map.getZoom(), 15), { animate: true });
+    }
+    report({ error: null });
+  }
+
+  map.on('movestart', () => {
+    if (programmaticMove) {
+      programmaticMove = false;
+      return;
+    }
+    if (following) {
+      following = false;
+      report({});
+    }
+  });
+
+  async function start() {
+    if (!('geolocation' in navigator)) {
+      report({ error: 'Geolocation is not available in this browser.' });
+      return;
+    }
+    following = true;
+    report({});
+
+    if (await requestOrientationPermission()) {
+      orientationHandler = handleOrientation;
+      window.addEventListener('deviceorientation', orientationHandler);
+    }
+
+    watchId = navigator.geolocation.watchPosition(
+      handlePosition,
+      (err) => report({ error: describeGeoError(err) }),
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
+    );
+  }
+
+  function stop() {
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    if (orientationHandler) window.removeEventListener('deviceorientation', orientationHandler);
+    orientationHandler = null;
+    following = false;
+    smoothedHeading = null;
+    if (markerAdded) {
+      map.removeLayer(marker);
+      map.removeLayer(accuracyCircle);
+      markerAdded = false;
+    }
+    report({ error: null });
+  }
+
+  function recenter() {
+    following = true;
+    if (markerAdded) {
+      programmaticMove = true;
+      map.setView(marker.getLatLng(), Math.max(map.getZoom(), 15), { animate: true });
+    }
+    report({});
+  }
+
+  return {
+    start,
+    stop,
+    recenter,
+    isActive: () => watchId != null,
+    isFollowing: () => following,
+  };
+}

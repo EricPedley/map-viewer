@@ -1,7 +1,11 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Served from https://<user>.github.io/map-viewer/ (a GitHub Pages project
+// site), so every asset URL needs this prefix — set base accordingly rather
+// than using root-absolute paths.
 export default defineConfig({
+  base: '/map-viewer/',
   build: {
     // route.json is a single ~450KB bundled data file; raise the default
     // chunk-size warning threshold instead of pointlessly code-splitting it.
@@ -15,15 +19,18 @@ export default defineConfig({
         name: 'Of Milk and Navvies — Offline Map',
         short_name: 'Milk & Navvies',
         description: 'Offline map viewer for the Of Milk and Navvies bikepacking route (Norway).',
-        start_url: '/',
         display: 'standalone',
         background_color: '#14161a',
         theme_color: '#14161a',
+        // No leading slash: vite-plugin-pwa prepends the resolved `base`
+        // (see base: '/map-viewer/' above) to these itself. A leading slash
+        // would be taken as already-absolute and left un-prefixed, breaking
+        // icons/start_url when served from a GitHub Pages project subpath.
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
           {
-            src: '/icons/icon-512-maskable.png',
+            src: 'icons/icon-512-maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',

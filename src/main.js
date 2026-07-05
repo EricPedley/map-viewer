@@ -11,6 +11,7 @@ import {
   getCachedTileCount,
 } from './offline.js';
 import { renderElevationProfile } from './elevation.js';
+import { createLocationTracker } from './geolocation.js';
 
 // ---------- Map setup ----------
 const map = L.map('map', { zoomControl: false, attributionControl: true });
@@ -162,28 +163,12 @@ renderElevationProfile(document.getElementById('elevation-chart'), {
 });
 
 // ---------- Offline tile download ----------
-const ZOOM_LEVELS = [12, 13, 14, 15, 16];
-const zoomChecksEl = document.getElementById('zoom-checks');
-ZOOM_LEVELS.forEach((z) => {
-  const label = document.createElement('label');
-  label.className = 'zoom-check';
-  const checked = z >= 13 && z <= 15;
-  label.innerHTML = `<input type="checkbox" value="${z}" ${checked ? 'checked' : ''}/> ${z}`;
-  zoomChecksEl.appendChild(label);
-});
-
-const bufferRange = document.getElementById('buffer-range');
-const bufferValue = document.getElementById('buffer-value');
-const BUFFER_LABELS = ['Route line only', 'Narrow', 'Medium', 'Wide'];
-function updateBufferLabel() {
-  bufferValue.textContent = BUFFER_LABELS[bufferRange.value];
-}
-bufferRange.addEventListener('input', updateBufferLabel);
-updateBufferLabel();
-
-function selectedZooms() {
-  return [...zoomChecksEl.querySelectorAll('input:checked')].map((el) => Number(el.value));
-}
+// Fixed corridor covering the whole route from overview (z12) down to
+// street-level (z16) detail. Not user-configurable on purpose — one button,
+// one sensible default, no decisions to get wrong before a trip.
+const OFFLINE_ZOOMS = [12, 13, 14, 15, 16];
+const OFFLINE_BUFFER_TILES = 1;
+const OFFLINE_SAMPLE_SPACING_METERS = 200;
 
 const offlineStatus = document.getElementById('offline-status');
 const progressWrap = document.getElementById('offline-progress');
@@ -191,7 +176,6 @@ const progressFill = document.getElementById('progress-fill');
 const progressText = document.getElementById('progress-text');
 const btnDownload = document.getElementById('btn-download');
 const btnCancel = document.getElementById('btn-cancel');
-const btnEstimate = document.getElementById('btn-estimate');
 const btnClearCache = document.getElementById('btn-clear-cache');
 
 const BYTES_PER_TILE_ESTIMATE = 22 * 1024; // rough average for a 256px satellite JPEG tile
@@ -203,43 +187,29 @@ async function refreshCacheStatus() {
     offlineStatus.textContent = 'No offline tiles cached yet.';
   } else {
     const when = meta?.timestamp ? new Date(meta.timestamp).toLocaleString() : 'unknown time';
+    const complete = meta?.failed ? ` (${meta.failed} tiles failed — try downloading again)` : '';
     offlineStatus.textContent = `${count.toLocaleString()} tiles cached (~${(
       (count * BYTES_PER_TILE_ESTIMATE) /
       1024 /
       1024
-    ).toFixed(0)} MB). Last download: ${when}.`;
+    ).toFixed(0)} MB). Last download: ${when}.${complete}`;
   }
 }
 refreshCacheStatus();
 
 function currentTileList() {
-  const zooms = selectedZooms();
-  const buffer = Number(bufferRange.value);
-  const spacing = 250; // meters between corridor sample points
-  return computeCorridorTiles(routeData.track, routeData.distances, zooms, buffer, spacing);
+  return computeCorridorTiles(
+    routeData.track,
+    routeData.distances,
+    OFFLINE_ZOOMS,
+    OFFLINE_BUFFER_TILES,
+    OFFLINE_SAMPLE_SPACING_METERS
+  );
 }
-
-btnEstimate.addEventListener('click', () => {
-  const zooms = selectedZooms();
-  if (zooms.length === 0) {
-    offlineStatus.textContent = 'Pick at least one zoom level first.';
-    return;
-  }
-  const tiles = currentTileList();
-  const mb = (tiles.length * BYTES_PER_TILE_ESTIMATE) / 1024 / 1024;
-  offlineStatus.textContent = `Estimate: ${tiles.length.toLocaleString()} tiles, ~${mb.toFixed(
-    0
-  )} MB. Tap Download to fetch them now.`;
-});
 
 let activeDownload = null;
 
 btnDownload.addEventListener('click', () => {
-  const zooms = selectedZooms();
-  if (zooms.length === 0) {
-    offlineStatus.textContent = 'Pick at least one zoom level first.';
-    return;
-  }
   const tiles = currentTileList();
 
   btnDownload.hidden = true;
@@ -282,6 +252,33 @@ btnClearCache.addEventListener('click', async () => {
   refreshCacheStatus();
 });
 
+// ---------- Current location + heading ----------
+const btnLocate = document.getElementById('btn-locate');
+const locateStatus = document.getElementById('locate-status');
+
+const locationTracker = createLocationTracker(map, {
+  onStatus: ({ tracking, following, error }) => {
+    btnLocate.classList.toggle('active', tracking && following);
+    btnLocate.classList.toggle('stale', tracking && !following);
+    if (error) {
+      locateStatus.hidden = false;
+      locateStatus.textContent = error;
+    } else {
+      locateStatus.hidden = true;
+    }
+  },
+});
+
+btnLocate.addEventListener('click', () => {
+  if (!locationTracker.isActive()) {
+    locationTracker.start();
+  } else if (!locationTracker.isFollowing()) {
+    locationTracker.recenter();
+  } else {
+    locationTracker.stop();
+  }
+});
+
 // ---------- PWA install / service worker ----------
 if ('serviceWorker' in navigator) {
   import('virtual:pwa-register').then(({ registerSW }) => {
@@ -289,6 +286,20 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  document.getElementById('install-hint').hidden = false;
-});
+// iOS Safari never fires `beforeinstallprompt` — there is no JS install API
+// at all. The only way to detect "not installed yet" there is to check
+// `navigator.standalone`, and the only way to install is the manual
+// Share -> Add to Home Screen flow, so that's what we point at.
+const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone =
+  window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+const installHint = document.getElementById('install-hint');
+if (isIos && !isStandalone) {
+  installHint.textContent = 'Install this app: tap Share, then "Add to Home Screen"';
+  installHint.hidden = false;
+} else {
+  window.addEventListener('beforeinstallprompt', () => {
+    installHint.textContent = 'Install this app: browser menu → "Add to Home Screen"';
+    installHint.hidden = false;
+  });
+}
