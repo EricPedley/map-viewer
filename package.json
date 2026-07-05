@@ -1,0 +1,24 @@
+{
+  "name": "of-milk-and-navvies-offline-map",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/convert-gpx.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/convert-gpx.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "convert-gpx": "node scripts/convert-gpx.mjs",
+    "make-icons": "node scripts/make-icons.mjs"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@xmldom/xmldom": "^0.9.6",
+    "sharp": "^0.35.3",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.20.5"
+  }
+}

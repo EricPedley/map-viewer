@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="description" content="Offline map viewer for the Of Milk and Navvies bikepacking route (Mjølkevegen and Rallarvegen, Norway)." />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Of Milk and Navvies — Offline Map</title>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div id="top-bar">
+      <button id="btn-pois" class="chip" aria-label="Points of interest">📍 POIs</button>
+      <button id="btn-elevation" class="chip" aria-label="Elevation profile">⛰️ Elevation</button>
+      <button id="btn-offline" class="chip" aria-label="Offline downloads">⬇️ Offline</button>
+      <span id="install-hint" class="chip chip-muted" hidden>Install this app: browser menu → "Add to Home Screen"</span>
+    </div>
+
+    <div id="panel-pois" class="panel" hidden>
+      <div class="panel-header">
+        <h2>Points of interest</h2>
+        <button class="panel-close" data-close="panel-pois">✕</button>
+      </div>
+      <div id="poi-filters"></div>
+      <ul id="poi-list"></ul>
+    </div>
+
+    <div id="panel-elevation" class="panel panel-bottom" hidden>
+      <div class="panel-header">
+        <h2 id="route-stats"></h2>
+        <button class="panel-close" data-close="panel-elevation">✕</button>
+      </div>
+      <div id="elevation-chart"></div>
+    </div>
+
+    <div id="panel-offline" class="panel" hidden>
+      <div class="panel-header">
+        <h2>Offline satellite tiles</h2>
+        <button class="panel-close" data-close="panel-offline">✕</button>
+      </div>
+      <p class="panel-note">
+        Downloads satellite imagery for a corridor around the route so the map works with
+        no signal. Do this once while you have wifi/signal, before you leave.
+      </p>
+      <div class="field">
+        <label>Detail level (zoom)</label>
+        <div id="zoom-checks" class="zoom-checks"></div>
+      </div>
+      <div class="field">
+        <label for="buffer-range">Corridor width: <span id="buffer-value"></span></label>
+        <input type="range" id="buffer-range" min="0" max="3" value="1" step="1" />
+      </div>
+      <div id="offline-status" class="offline-status"></div>
+      <div class="offline-actions">
+        <button id="btn-estimate">Estimate size</button>
+        <button id="btn-download" class="primary">Download</button>
+        <button id="btn-cancel" hidden>Cancel</button>
+        <button id="btn-clear-cache" class="danger">Clear cache</button>
+      </div>
+      <div id="offline-progress" class="offline-progress" hidden>
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <div id="progress-text"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
