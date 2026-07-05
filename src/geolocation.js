@@ -93,7 +93,11 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
     }
     const el = marker.getElement()?.querySelector('.geo-heading');
     if (el) {
-      el.style.display = '';
+      // .geo-heading is `display: none` by default in CSS so the cone is
+      // hidden until a real heading arrives. Clearing the inline style here
+      // (`= ''`) would just fall back to that class rule, not reveal it —
+      // has to be set to an actual displayed value.
+      el.style.display = 'block';
       el.style.transform = `rotate(${smoothedHeading}deg)`;
     }
   }

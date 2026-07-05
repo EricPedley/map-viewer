@@ -84,7 +84,11 @@ html, body {
 .geo-heading {
   position: absolute;
   inset: 0;
-  clip-path: polygon(50% 50%, 32% 6%, 68% 6%);
+  /* Apex sits right on the dot's visible edge (11px radius incl. border,
+     ~22% of this 40px box) rather than converging under the round dot —
+     otherwise the tip is hidden and what's visible is a straight wedge
+     edge meeting the dot's curved boundary instead of a clean point. */
+  clip-path: polygon(50% 22%, 32% 6%, 68% 6%);
   background: rgba(43, 131, 255, 0.45);
   transform-origin: 50% 50%;
   display: none;
