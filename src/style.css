@@ -18,11 +18,27 @@ html, body {
   color: var(--text);
 }
 
-#map-tilt-wrap {
+/* perspective has to live on an *ancestor* of the element being 3D-rotated
+   — it establishes the 3D viewing context for its children, it does
+   nothing for the element it's set on. #map-tilt-wrap is the one that
+   actually gets `transform: rotateX()` (in follow.js), so perspective
+   belongs up here on its parent, not combined onto the same element. */
+#map-perspective {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  perspective: 1000px;
+  perspective: 1500px;
+}
+
+#map-tilt-wrap {
+  position: absolute;
+  inset: 0;
+  /* Pivot the tilt around the bottom edge (camera behind/above the rider)
+     rather than the center — besides being the more natural "driving view"
+     framing, it also means only the far/top side recedes into the
+     perspective compression, which is what the map-enlarged overscan
+     below is sized for. */
+  transform-origin: 50% 100%;
 }
 
 #map {
@@ -34,12 +50,20 @@ html, body {
 /* The rotated/tilted view's visible on-screen rectangle no longer matches
    the axis-aligned box Leaflet actually measures and loads tiles for, so
    this gives it extra room around the edges (paired with a larger
-   keepBuffer on the tile layer itself) to avoid gaps at the corners. */
+   keepBuffer on the tile layer itself) to avoid gaps at the corners.
+   Sized from the actual perspective projection math for a 35deg tilt at
+   1500px perspective, not guessed: a point at the top edge of a H-tall
+   plane, rotated around its bottom edge, projects to on-screen distance
+   d*cos(35)*P/(P+d*sin(35)) from the pivot — solving for the on-screen
+   top of the viewport (d=H) needs source distance d = H*P/(P*cos(35) -
+   H*sin(35)), i.e. about 2.1x the viewport height even at a generous
+   900px-tall viewport, with 260% here as comfortable headroom above that
+   plus margin for landscape/other aspect ratios. */
 #map.map-enlarged {
-  width: 160%;
-  height: 160%;
-  left: -30%;
-  top: -30%;
+  width: 260%;
+  height: 260%;
+  left: -80%;
+  top: -80%;
 }
 
 /* No override needed here for the heading cone in follow mode, and that's
@@ -98,6 +122,10 @@ html, body {
 
 .nav-banner {
   position: absolute;
+  /* Fallback only — main.js sets this inline from the top bar's actual
+     rendered height every time the banner is shown, since the row of
+     buttons up there wraps to two lines on narrow phones and a fixed
+     offset here ends up hidden behind them. */
   top: max(60px, calc(env(safe-area-inset-top) + 50px));
   left: max(10px, env(safe-area-inset-left));
   right: max(10px, env(safe-area-inset-right));

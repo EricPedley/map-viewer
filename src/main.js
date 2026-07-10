@@ -30,10 +30,11 @@ L.control.zoom({ position: 'bottomright' }).addTo(map);
 const satellite = L.tileLayer(SATELLITE_URL_TEMPLATE, {
   maxZoom: 18,
   maxNativeZoom: 17,
-  // Follow mode's rotated/tilted view shows a visual area bigger than the
-  // axis-aligned rectangle Leaflet loads tiles for by default — a larger
-  // buffer of surrounding tiles keeps the rotated corners from going blank.
-  keepBuffer: 6,
+  // Follow mode enlarges #map to ~2.6x viewport size to cover the tilted
+  // view's perspective-compressed far edge (see style.css) — keepBuffer
+  // needs to be generous enough that the whole enlarged area gets tiles,
+  // not just the part that happened to already be visible pre-enlarge.
+  keepBuffer: 10,
   attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
 }).addTo(map);
 
@@ -339,6 +340,15 @@ const followMode = createFollowMode(map, {
   tiltWrapEl: document.getElementById('map-tilt-wrap'),
 });
 
+const topBar = document.getElementById('top-bar');
+// The top bar's row of buttons wraps to two lines on narrow phones, so its
+// actual rendered height varies — read it directly rather than assuming a
+// fixed offset, or the banner ends up hidden behind the second row.
+function positionNavBanner() {
+  navBanner.style.top = `${topBar.getBoundingClientRect().bottom + 8}px`;
+}
+window.addEventListener('resize', positionNavBanner);
+
 function updateNavBanner() {
   if (!followMode.isActive() || currentMileageMeters == null) {
     navBanner.hidden = true;
@@ -361,6 +371,7 @@ function updateNavBanner() {
   navBannerIcon.textContent = CUE_ICONS[cue.direction] ?? '⬆️';
   navBannerText.textContent = cue.instruction;
   navBannerDist.textContent = `${metersToMiles(nextDist - currentMileageMeters).toFixed(1)} mi`;
+  positionNavBanner();
   navBanner.hidden = false;
 }
 

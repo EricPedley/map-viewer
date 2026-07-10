@@ -9,8 +9,16 @@ import { destinationPoint } from './projection.js';
 // (drag/pinch) that would otherwise need to translate an on-screen tap
 // through the rotated/tilted view back into a real map coordinate.
 const NAV_ZOOM = 17;
-const TILT_DEG = 55;
-const LOOK_AHEAD_METERS = 70;
+// Paired with the perspective/overscan values in style.css (#map-perspective,
+// #map.map-enlarged) — see the comment there for why 35deg specifically:
+// steeper tilts at a fixed perspective distance approach a singularity
+// where the horizon line needs a near-infinite amount of pre-rendered map
+// to fill (this was the actual cause of black/unrendered tiles, not just
+// "not enough buffer").
+const TILT_DEG = 35;
+// How far ahead of the rider (in meters) the camera centers on, pushing
+// the rider's own dot down-screen so more of the road ahead is visible.
+const LOOK_AHEAD_METERS = 160;
 
 export function createFollowMode(map, { mapEl, tiltWrapEl }) {
   let active = false;
