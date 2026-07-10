@@ -10,13 +10,24 @@
     <title>Of Milk and Navvies — Offline Map</title>
   </head>
   <body>
-    <div id="map"></div>
+    <div id="map-tilt-wrap">
+      <div id="map"></div>
+    </div>
+
+    <div id="nav-banner" class="nav-banner" hidden>
+      <span id="nav-banner-icon" class="nav-banner-icon"></span>
+      <span id="nav-banner-text" class="nav-banner-text"></span>
+      <span id="nav-banner-dist" class="nav-banner-dist"></span>
+    </div>
 
     <div id="top-bar">
       <button id="btn-pois" class="chip" aria-label="Points of interest">📍 POIs</button>
       <button id="btn-elevation" class="chip" aria-label="Elevation profile">⛰️ Elevation</button>
       <button id="btn-offline" class="chip" aria-label="Offline downloads">⬇️ Offline</button>
       <button id="btn-locate" class="chip" aria-label="Show my location">🧭 Locate</button>
+      <button id="btn-follow" class="chip" aria-label="Follow mode (heading-up navigation view)" disabled>
+        🚵 Follow
+      </button>
       <span id="install-hint" class="chip chip-muted" hidden></span>
     </div>
 

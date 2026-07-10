@@ -13,6 +13,7 @@ import {
 import { renderElevationProfile } from './elevation.js';
 import { createLocationTracker } from './geolocation.js';
 import { nearestRouteDistanceMeters, metersToMiles } from './projection.js';
+import { createFollowMode } from './follow.js';
 
 // ---------- Map setup ----------
 const map = L.map('map', { zoomControl: false, attributionControl: true });
@@ -21,6 +22,10 @@ L.control.zoom({ position: 'bottomright' }).addTo(map);
 const satellite = L.tileLayer(SATELLITE_URL_TEMPLATE, {
   maxZoom: 18,
   maxNativeZoom: 17,
+  // Follow mode's rotated/tilted view shows a visual area bigger than the
+  // axis-aligned rectangle Leaflet loads tiles for by default — a larger
+  // buffer of surrounding tiles keeps the rotated corners from going blank.
+  keepBuffer: 6,
   attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
 }).addTo(map);
 
@@ -57,6 +62,23 @@ const poiMarkers = routeData.pois.map((poi) => {
 const poiRouteDistance = routeData.pois.map((poi) =>
   nearestRouteDistanceMeters(routeData.track, routeData.distances, poi.lat, poi.lon)
 );
+
+// Same idea for turn-by-turn cues, used by the follow-mode nav banner.
+const cueRouteDistance = routeData.cues.map((cue) =>
+  nearestRouteDistanceMeters(routeData.track, routeData.distances, cue.lat, cue.lon)
+);
+
+const CUE_ICONS = {
+  Left: '⬅️',
+  Right: '➡️',
+  Straight: '⬆️',
+  'Slight Left': '↖️',
+  'Slight Right': '↗️',
+  'Sharp Left': '↙️',
+  'Sharp Right': '↘️',
+  Uturn: '↩️',
+  'U-turn': '↩️',
+};
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -287,6 +309,52 @@ btnClearCache.addEventListener('click', async () => {
 // ---------- Current location + heading ----------
 const btnLocate = document.getElementById('btn-locate');
 const locateStatus = document.getElementById('locate-status');
+const btnFollow = document.getElementById('btn-follow');
+const navBanner = document.getElementById('nav-banner');
+const navBannerIcon = document.getElementById('nav-banner-icon');
+const navBannerText = document.getElementById('nav-banner-text');
+const navBannerDist = document.getElementById('nav-banner-dist');
+
+const followMode = createFollowMode(map, {
+  mapEl: document.getElementById('map'),
+  tiltWrapEl: document.getElementById('map-tilt-wrap'),
+});
+
+function updateNavBanner() {
+  if (!followMode.isActive() || currentMileageMeters == null) {
+    navBanner.hidden = true;
+    return;
+  }
+  let nextIdx = -1;
+  let nextDist = Infinity;
+  for (let i = 0; i < cueRouteDistance.length; i++) {
+    const d = cueRouteDistance[i];
+    if (d >= currentMileageMeters && d < nextDist) {
+      nextDist = d;
+      nextIdx = i;
+    }
+  }
+  if (nextIdx === -1) {
+    navBanner.hidden = true;
+    return;
+  }
+  const cue = routeData.cues[nextIdx];
+  navBannerIcon.textContent = CUE_ICONS[cue.direction] ?? '⬆️';
+  navBannerText.textContent = cue.instruction;
+  navBannerDist.textContent = `${metersToMiles(nextDist - currentMileageMeters).toFixed(1)} mi`;
+  navBanner.hidden = false;
+}
+
+function setFollowActive(active) {
+  if (active) {
+    const latlng = locationTracker.getLatLng();
+    followMode.enable(latlng?.lat, latlng?.lng, locationTracker.getHeading());
+  } else {
+    followMode.disable();
+  }
+  btnFollow.classList.toggle('active', active);
+  updateNavBanner();
+}
 
 const locationTracker = createLocationTracker(map, {
   onStatus: ({ tracking, following, error, headingState }) => {
@@ -303,14 +371,23 @@ const locationTracker = createLocationTracker(map, {
     } else {
       locateStatus.hidden = true;
     }
-    if (!tracking && currentMileageMeters != null) {
-      currentMileageMeters = null;
-      renderPoiListItems();
+    btnFollow.disabled = !tracking;
+    if (!tracking) {
+      if (followMode.isActive()) setFollowActive(false);
+      if (currentMileageMeters != null) {
+        currentMileageMeters = null;
+        renderPoiListItems();
+      }
     }
   },
   onPosition: ({ lat, lon }) => {
     currentMileageMeters = nearestRouteDistanceMeters(routeData.track, routeData.distances, lat, lon);
     renderPoiListItems();
+    updateNavBanner();
+    if (followMode.isActive()) followMode.updatePosition(lat, lon, locationTracker.getHeading());
+  },
+  onHeading: (headingDeg) => {
+    if (followMode.isActive()) followMode.updateHeading(headingDeg);
   },
 });
 
@@ -322,6 +399,11 @@ btnLocate.addEventListener('click', () => {
   } else {
     locationTracker.stop();
   }
+});
+
+btnFollow.addEventListener('click', () => {
+  if (btnFollow.disabled) return;
+  setFollowActive(!followMode.isActive());
 });
 
 // ---------- PWA install / service worker ----------

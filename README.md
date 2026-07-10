@@ -18,6 +18,10 @@ bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
   shows miles until you reach it, dropping anything you've already passed.
 - Elevation chart shows percent grade (not raw elevation) so you can see
   how steep what's ahead actually is.
+- "Follow" mode (only enabled while location is on): a Google Maps-style
+  driving view — the map rotates to your heading and tilts for a pseudo-3D
+  look-ahead perspective, with a turn-by-turn cue banner (from the route's
+  cue sheet) showing the next turn and how far to it.
 - Installable as a PWA (Add to Home Screen).
 
 ## Development
@@ -56,8 +60,25 @@ use — this is common practice among hobbyist offline-map projects, but if
 you outgrow "one person's personal bikepacking route," consider a provider
 with an explicit offline license (e.g. MapTiler).
 
+## Follow mode: how it works
+
+`src/follow.js` rotates and tilts the map with a plain CSS transform on
+wrapper elements around the Leaflet container, rather than using a
+rotation-aware Leaflet fork — Leaflet itself keeps thinking north is up and
+never finds out. That's why dragging/pinch-zoom are disabled while it's
+active: those gestures need to translate an on-screen tap through the
+rotated/tilted view back into a real map coordinate, which only Leaflet's
+own (rotation-unaware) math does. The "look ahead" camera effect is done in
+geographic space instead of pixel space — each position update centers the
+map on a point projected ~70m ahead of the rider along their heading
+(`destinationPoint` in `src/projection.js`), so the rider's actual dot ends
+up lower on screen with more of the road ahead visible above it.
+
 ## Updating the route
 
 Replace `source-data/route.gpx` with a new GPX (track points in a `<trk>`,
 named POIs as `<wpt>` elements) and rerun `npm run convert-gpx` (or just
-`npm run dev` / `npm run build`, which do it automatically).
+`npm run dev` / `npm run build`, which do it automatically). Turn-by-turn
+cues (for follow mode's nav banner) come from a separate `source-data/cues.gpx`
+cue-sheet export — its waypoints are matched by name against the turn
+vocabulary in `scripts/convert-gpx.mjs` (`Left`, `Right`, `Slight Left`, etc).

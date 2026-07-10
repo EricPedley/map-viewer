@@ -54,11 +54,10 @@ function computeHeadingFromOrientation(event) {
   return null;
 }
 
-export function createLocationTracker(map, { onStatus, onPosition } = {}) {
+export function createLocationTracker(map, { onStatus, onPosition, onHeading } = {}) {
   let watchId = null;
   let orientationHandler = null;
   let following = false;
-  let programmaticMove = false;
   let smoothedHeading = null;
   let markerAdded = false;
   let headingState = null; // null = not asked yet, else 'granted' | 'denied' | 'unsupported'
@@ -100,6 +99,7 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
       el.style.display = 'block';
       el.style.transform = `rotate(${smoothedHeading}deg)`;
     }
+    onHeading?.(smoothedHeading);
   }
 
   function handleOrientation(event) {
@@ -122,18 +122,18 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
     if (heading != null && !orientationHandler) setHeading(heading);
 
     if (following) {
-      programmaticMove = true;
       map.setView(latlng, Math.max(map.getZoom(), 15), { animate: true });
     }
     report({ error: null });
     onPosition?.({ lat: latitude, lon: longitude, accuracy });
   }
 
-  map.on('movestart', () => {
-    if (programmaticMove) {
-      programmaticMove = false;
-      return;
-    }
+  // 'dragstart' only fires for an actual user drag gesture (Leaflet's Drag
+  // handler), unlike the more general 'movestart' which also fires for our
+  // own programmatic setView() calls (including follow mode's) — so this
+  // is a reliable "the user manually panned" signal with no flag-tracking
+  // needed to distinguish it from our own moves.
+  map.on('dragstart', () => {
     if (following) {
       following = false;
       report({});
@@ -180,7 +180,6 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
   function recenter() {
     following = true;
     if (markerAdded) {
-      programmaticMove = true;
       map.setView(marker.getLatLng(), Math.max(map.getZoom(), 15), { animate: true });
     }
     report({});
@@ -192,5 +191,7 @@ export function createLocationTracker(map, { onStatus, onPosition } = {}) {
     recenter,
     isActive: () => watchId != null,
     isFollowing: () => following,
+    getLatLng: () => (markerAdded ? marker.getLatLng() : null),
+    getHeading: () => smoothedHeading,
   };
 }

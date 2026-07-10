@@ -7,6 +7,7 @@ import { DOMParser } from '@xmldom/xmldom';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const gpxPath = path.join(__dirname, '..', 'source-data', 'route.gpx');
+const cuesPath = path.join(__dirname, '..', 'source-data', 'cues.gpx');
 const outPath = path.join(__dirname, '..', 'src', 'data', 'route.json');
 
 const xml = readFileSync(gpxPath, 'utf-8');
@@ -39,6 +40,36 @@ for (let i = 0; i < wpts.length; i++) {
   const desc = text(pt, 'desc') || text(pt, 'cmt');
   if (!name) continue; // skip the two unnamed route-title bookends if present
   pois.push({ lat, lon, name, desc });
+}
+
+// Turn-by-turn cues (a separate export from the same route — its 285
+// waypoints are mostly cue-sheet turns like "Left"/"Right"/"Slight Right"
+// rather than named POIs, so it's kept as its own source file and only the
+// actual turn waypoints are pulled out here).
+const TURN_NAMES = new Set([
+  'Left',
+  'Right',
+  'Straight',
+  'Slight Left',
+  'Slight Right',
+  'Sharp Left',
+  'Sharp Right',
+  'Uturn',
+  'U-turn',
+]);
+
+const cues = [];
+const cuesXml = readFileSync(cuesPath, 'utf-8');
+const cuesDoc = new DOMParser().parseFromString(cuesXml, 'text/xml');
+const cueWpts = cuesDoc.getElementsByTagName('wpt');
+for (let i = 0; i < cueWpts.length; i++) {
+  const pt = cueWpts[i];
+  const direction = text(pt, 'name');
+  if (!TURN_NAMES.has(direction)) continue;
+  const lat = parseFloat(pt.getAttribute('lat'));
+  const lon = parseFloat(pt.getAttribute('lon'));
+  const instruction = text(pt, 'desc') || text(pt, 'cmt') || direction;
+  cues.push({ lat, lon, direction, instruction });
 }
 
 // Cumulative distance (meters) along the track, using the haversine formula,
@@ -76,11 +107,12 @@ const data = {
   elevationGainMeters: Math.round(gain),
   elevationLossMeters: Math.round(loss),
   pois,
+  cues,
 };
 
 mkdirSync(path.dirname(outPath), { recursive: true });
 writeFileSync(outPath, JSON.stringify(data));
 console.log(
-  `Wrote ${outPath}: ${track.length} track points, ${pois.length} POIs, ` +
+  `Wrote ${outPath}: ${track.length} track points, ${pois.length} POIs, ${cues.length} turn cues, ` +
     `${(dist / 1000).toFixed(1)} km, +${Math.round(gain)}m/-${Math.round(loss)}m`
 );
