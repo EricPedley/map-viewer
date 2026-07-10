@@ -1,11 +1,19 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
 // Served from https://<user>.github.io/map-viewer/ (a GitHub Pages project
 // site), so every asset URL needs this prefix — set base accordingly rather
 // than using root-absolute paths.
 export default defineConfig({
   base: '/map-viewer/',
+  define: {
+    // package.json's version is the single source of truth for the version
+    // shown in the app — bump it there when tagging a release.
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   build: {
     // route.json is a single ~450KB bundled data file; raise the default
     // chunk-size warning threshold instead of pointlessly code-splitting it.

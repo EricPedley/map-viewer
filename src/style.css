@@ -353,6 +353,18 @@ html, body {
   font-size: 10px !important;
 }
 
+#app-version {
+  position: absolute;
+  left: 50%;
+  bottom: max(4px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 900;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
 /* Keep the zoom control clear of the iPhone home-indicator gesture area. */
 .leaflet-bottom.leaflet-right {
   margin-bottom: env(safe-area-inset-bottom);

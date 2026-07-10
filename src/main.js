@@ -14,9 +14,17 @@ import { renderElevationProfile } from './elevation.js';
 import { createLocationTracker } from './geolocation.js';
 import { nearestRouteDistanceMeters, metersToMiles } from './projection.js';
 import { createFollowMode } from './follow.js';
+import { gradeProfile, gradeColor } from './grade.js';
+
+// __APP_VERSION__ is injected at build time from package.json (see
+// vite.config.js) so there's one source of truth for the version number.
+document.getElementById('app-version').textContent = `v${__APP_VERSION__}`;
 
 // ---------- Map setup ----------
-const map = L.map('map', { zoomControl: false, attributionControl: true });
+// preferCanvas: the track is drawn as ~950 separate colored polyline
+// segments (one per grade sample) rather than one path — canvas batches
+// them onto a single layer instead of ~950 individual SVG DOM nodes.
+const map = L.map('map', { zoomControl: false, attributionControl: true, preferCanvas: true });
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 const satellite = L.tileLayer(SATELLITE_URL_TEMPLATE, {
@@ -30,8 +38,19 @@ const satellite = L.tileLayer(SATELLITE_URL_TEMPLATE, {
 }).addTo(map);
 
 const latlngs = routeData.track.map(([lat, lon]) => [lat, lon]);
-const trackLine = L.polyline(latlngs, { color: '#ff5a1f', weight: 4, opacity: 0.9 }).addTo(map);
-map.fitBounds(trackLine.getBounds(), { padding: [24, 24] });
+map.fitBounds(L.latLngBounds(latlngs), { padding: [24, 24] });
+
+// Track colored by grade (blue descents -> white flat -> red climbs)
+// instead of one flat color — drawn as one polyline per grade segment,
+// following the actual recorded path between each segment's endpoints
+// (not a straight line between them) so curves stay accurate.
+for (const seg of gradeProfile(routeData.track, routeData.distances)) {
+  const segLatLngs = [];
+  for (let i = seg.indexStart; i <= seg.indexEnd; i++) {
+    segLatLngs.push([routeData.track[i][0], routeData.track[i][1]]);
+  }
+  L.polyline(segLatLngs, { color: gradeColor(seg.grade), weight: 4, opacity: 0.95 }).addTo(map);
+}
 
 function poiDivIcon(cat) {
   return L.divIcon({

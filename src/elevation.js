@@ -1,57 +1,12 @@
 import { metersToMiles } from './projection.js';
-
-// Percent-grade profile (rise/run * 100) rather than absolute elevation —
-// what matters for a bike route is how steep the next climb is, not the
-// absolute altitude. Consumer GPX elevation is noisy enough (recorded GPS
-// altitude error, not distance error) that differencing raw or lightly
-// resampled points produces swings up to +-35%, nothing like a real road.
-// Resampling to a longer, consistent run plus a moving-average smoothing
-// pass on elevation brings that down to a believable +-10-15% range for
-// this kind of gravel mountain route.
-const GRADE_SEGMENT_METERS = 400;
-const SMOOTHING_WINDOW = 2; // +-2 resampled points = 5-point moving average
-
-function resampleByDistance(track, distances, spacingMeters) {
-  const samples = [];
-  let nextAt = 0;
-  for (let i = 0; i < track.length; i++) {
-    if (distances[i] >= nextAt) {
-      samples.push({ dist: distances[i], ele: track[i][2] });
-      nextAt += spacingMeters;
-    }
-  }
-  return samples;
-}
-
-function smoothElevation(samples, window) {
-  return samples.map((s, i) => {
-    let sum = 0;
-    let count = 0;
-    for (let j = Math.max(0, i - window); j <= Math.min(samples.length - 1, i + window); j++) {
-      sum += samples[j].ele;
-      count++;
-    }
-    return { dist: s.dist, ele: sum / count };
-  });
-}
-
-function computeGrades(samples) {
-  const grades = [];
-  for (let i = 1; i < samples.length; i++) {
-    const rise = samples[i].ele - samples[i - 1].ele;
-    const run = samples[i].dist - samples[i - 1].dist;
-    grades.push({ dist: samples[i].dist, grade: run > 0 ? (rise / run) * 100 : 0 });
-  }
-  return grades;
-}
+import { gradeProfile } from './grade.js';
 
 export function renderElevationProfile(container, { track, distances, onHover }) {
   const width = 1000;
   const height = 160;
   const padding = { top: 10, right: 10, bottom: 22, left: 42 };
 
-  const samples = smoothElevation(resampleByDistance(track, distances, GRADE_SEGMENT_METERS), SMOOTHING_WINDOW);
-  const grades = computeGrades(samples);
+  const grades = gradeProfile(track, distances);
   const maxDist = distances[distances.length - 1];
 
   const gradeValues = grades.map((g) => g.grade);

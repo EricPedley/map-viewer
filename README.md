@@ -5,8 +5,9 @@ bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
 
 **Live app: https://ericpedley.github.io/map-viewer/**
 
-- Route track + 65 points of interest (resupply, lodging, camping, water, sights)
-  baked in from the official GPX, no network needed to see them.
+- Route track (colored by grade — blue descents, white flat, red climbs) +
+  65 points of interest (resupply, lodging, camping, water, sights) baked
+  in from the official GPX, no network needed to see them.
 - Satellite basemap (Esri World Imagery).
 - One-tap "Download offline map" caches satellite tiles for a corridor
   around the route (overview down to street-level zoom), so the map keeps
@@ -23,6 +24,9 @@ bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
   look-ahead perspective, with a turn-by-turn cue banner (from the route's
   cue sheet) showing the next turn and how far to it.
 - Installable as a PWA (Add to Home Screen).
+- Version number shown small at the bottom of the screen — comes from
+  `package.json`'s `version` field (see `vite.config.js`'s `define`), so
+  that's the one place to bump it when tagging a release.
 
 ## Development
 
