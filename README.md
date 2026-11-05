@@ -1,17 +1,16 @@
-# map-viewer
+# Eric's Cycling App
 
-Offline-capable PWA for viewing the [Of Milk and Navvies](https://bikepacking.com/routes/of-milk-and-navvies/)
-bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
+Offline-capable PWA for riding GPS routes with no signal: map, turn-by-turn
+cues, resupply stops and water.
 
 **Live app: https://ericpedley.github.io/map-viewer/**
 
-- Route selector (🗺️ Routes): switch between the Of Milk and Navvies GPX route
-  and the four Garmin "Bike Camp" loop courses. The choice is remembered, and
-  every route's data is precached by the service worker so any of them opens
-  offline.
-- Route track (colored by grade — blue descents, white flat, red climbs) +
-  65 points of interest (resupply, lodging, camping, water, sights) baked
-  in from the official GPX, no network needed to see them.
+- Route selector (🗺️ Routes) for the Garmin "Bike Camp" loop courses
+  (`source-data/routes/*.fit`). The choice is remembered, and every route's
+  data is precached by the service worker so any of them opens offline.
+- Route track colored by grade (blue descents, white flat, red climbs), with
+  water refill points from the course plus convenience stores and gas
+  stations from OpenStreetMap.
 - Satellite basemap (Esri World Imagery).
 - One-tap "Download offline map" caches satellite tiles for a corridor
   around the route (overview down to street-level zoom), so the map keeps
@@ -89,11 +88,11 @@ up lower on screen with more of the road ahead visible above it.
   rebuild. It shows up in the selector automatically, named after the
   course's own name. Course points (e.g. "Water") become POIs. Parsing is
   done by `scripts/convert-fit.mjs` using Garmin's `@garmin/fitsdk`.
-- **The GPX route**: replace `source-data/route.gpx` (track points in a `<trk>`,
-  named POIs as `<wpt>` elements) and rerun `npm run convert-routes`.
-  Turn-by-turn cues come from a separate `source-data/cues.gpx` cue-sheet
-  export — its waypoints are matched by name against the turn vocabulary in
-  `scripts/convert-gpx.mjs` (`Left`, `Right`, `Slight Left`, etc).
+- **GPX routes (not currently used)**: `scripts/convert-gpx.mjs` can still
+  convert `source-data/route.gpx` (+ `cues.gpx`) into a route; run
+  `npm run convert-gpx` between the clean and index steps of
+  `convert-routes` to add it back. The Of Milk and Navvies route was removed
+  from the selector.
 
 Each route is its own lazy-loaded chunk, so adding routes doesn't slow the
 initial load. The offline tile cache is shared across routes, but "Download

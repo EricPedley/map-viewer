@@ -10,9 +10,7 @@ import { ROUTES_OUT_DIR } from './route-utils.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outPath = path.join(__dirname, '..', 'src', 'data', 'routes-index.json');
 
-// The original GPX route stays first (and is the default); everything else is
-// listed shortest to longest.
-const DEFAULT_ID = 'of-milk-and-navvies';
+// Listed shortest to longest; the shortest is the default selection.
 
 const routes = readdirSync(ROUTES_OUT_DIR)
   .filter((f) => f.endsWith('.json'))
@@ -27,11 +25,7 @@ const routes = readdirSync(ROUTES_OUT_DIR)
       poiCount: r.pois.length,
     };
   })
-  .sort((a, b) => {
-    if (a.id === DEFAULT_ID) return -1;
-    if (b.id === DEFAULT_ID) return 1;
-    return a.totalDistanceMeters - b.totalDistanceMeters;
-  });
+  .sort((a, b) => a.totalDistanceMeters - b.totalDistanceMeters);
 
-writeFileSync(outPath, JSON.stringify({ defaultId: DEFAULT_ID, routes }));
+writeFileSync(outPath, JSON.stringify({ defaultId: routes[0].id, routes }));
 console.log(`Wrote ${path.relative(process.cwd(), outPath)}: ${routes.length} routes`);

@@ -298,14 +298,12 @@ const btnClearCache = document.getElementById('btn-clear-cache');
 const BYTES_PER_TILE_ESTIMATE = 22 * 1024; // rough average for a 256px satellite JPEG tile
 
 // Tiles are cached into one shared bucket, but "when did I last download"
-// is tracked per route. (Older versions stored a single un-keyed record,
-// which belonged to the original route.)
-const LEGACY_ROUTE_ID = routesIndex.defaultId;
+// is tracked per route. (Older versions stored one un-keyed record for a
+// since-removed route; that shape is just ignored.)
 function readDownloadMeta() {
   try {
     const raw = JSON.parse(localStorage.getItem('offlineDownloadMeta') || 'null');
-    if (!raw) return {};
-    return raw.timestamp ? { [LEGACY_ROUTE_ID]: raw } : raw;
+    return raw && !raw.timestamp ? raw : {};
   } catch {
     return {};
   }
@@ -607,7 +605,7 @@ async function selectRoute(id, { fit = true } = {}) {
   renderRouteList();
   refreshOfflineEstimate();
   refreshCacheStatus();
-  document.title = `${route.name} — Offline Map`;
+  document.title = `${route.name} — Eric's Cycling App`;
 
   // If location is already on, re-place the rider on the new route (no hint:
   // it's a different track, so the old mileage means nothing).

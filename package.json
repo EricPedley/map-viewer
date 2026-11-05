@@ -1,5 +1,5 @@
 {
-  "name": "of-milk-and-navvies-offline-map",
+  "name": "erics-cycling-app",
   "private": true,
   "version": "1.4.0",
   "type": "module",
@@ -9,8 +9,8 @@
     "prebuild": "npm run convert-routes",
     "build": "vite build",
     "preview": "vite preview",
-    "convert-routes": "node scripts/convert-gpx.mjs && node scripts/convert-fit.mjs && node scripts/build-route-index.mjs",
-    "convert-gpx": "npm run convert-routes",
+    "convert-routes": "node scripts/clean-routes.mjs && node scripts/convert-fit.mjs && node scripts/build-route-index.mjs",
+    "convert-gpx": "node scripts/convert-gpx.mjs",
     "fetch-osm": "npm run convert-routes && node scripts/fetch-osm.mjs",
     "test": "node --test scripts/osm-turns.test.mjs",
     "make-icons": "node scripts/make-icons.mjs"
