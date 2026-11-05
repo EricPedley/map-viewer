@@ -1,0 +1,184 @@
+{
+ "id": "bike-camp-2-5-hour-loop-flat",
+ "trackHash": "7a627e199c4f93a8",
+ "source": "© OpenStreetMap contributors (ODbL), via the Overpass API",
+ "cues": [
+  {
+   "lat": 33.256593,
+   "lon": -116.376159,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Palm Canyon Drive, CR S22",
+   "dist": 2744
+  },
+  {
+   "lat": 33.256383,
+   "lon": -116.37566,
+   "direction": "Left",
+   "instruction": "At the roundabout, take the 5th exit onto Palm Canyon Drive, CR S22",
+   "dist": 2794
+  },
+  {
+   "lat": 33.256588,
+   "lon": -116.373872,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Palm Canyon Drive, CR S22",
+   "dist": 3006
+  },
+  {
+   "lat": 33.256864,
+   "lon": -116.348392,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Palm Canyon Drive, CR S22",
+   "dist": 5375
+  },
+  {
+   "lat": 33.303695,
+   "lon": -116.25891,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Borrego Salton Seaway, CR S22",
+   "dist": 17726
+  },
+  {
+   "lat": 33.283181,
+   "lon": -116.152369,
+   "direction": "Right",
+   "instruction": "Turn right onto Arroyo Salado",
+   "dist": 28273
+  },
+  {
+   "lat": 33.283181,
+   "lon": -116.152369,
+   "direction": "Left",
+   "instruction": "Turn left onto Borrego Salton Seaway, CR S22",
+   "dist": 29324
+  },
+  {
+   "lat": 33.283651,
+   "lon": -116.153389,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Borrego Salton Seaway, CR S22",
+   "dist": 29432
+  },
+  {
+   "lat": 33.302713,
+   "lon": -116.197978,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Borrego Salton Seaway, CR S22",
+   "dist": 34112
+  },
+  {
+   "lat": 33.29285,
+   "lon": -116.297859,
+   "direction": "Right",
+   "instruction": "Turn right onto Henderson Canyon Road, County Highway S22",
+   "dist": 43826
+  },
+  {
+   "lat": 33.300588,
+   "lon": -116.366807,
+   "direction": "Right",
+   "instruction": "Turn right onto Di Giorgio Road",
+   "dist": 50632
+  },
+  {
+   "lat": 33.301244,
+   "lon": -116.366864,
+   "direction": "Left",
+   "instruction": "Turn left onto Henderson Canyon Road",
+   "dist": 50705
+  },
+  {
+   "lat": 33.300887,
+   "lon": -116.387355,
+   "direction": "Left",
+   "instruction": "Turn left onto Henderson Canyon Road",
+   "dist": 52638
+  },
+  {
+   "lat": 33.284207,
+   "lon": -116.375265,
+   "direction": "Right",
+   "instruction": "Turn right onto Big Horn Road",
+   "dist": 54899
+  },
+  {
+   "lat": 33.280018,
+   "lon": -116.393173,
+   "direction": "Left",
+   "instruction": "Turn left onto Lazy S Drive",
+   "dist": 56678
+  },
+  {
+   "lat": 33.271301,
+   "lon": -116.385597,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Lazy S Drive",
+   "dist": 57915
+  },
+  {
+   "lat": 33.267189,
+   "lon": -116.385597,
+   "direction": "Right",
+   "instruction": "Turn right onto Verbena Drive",
+   "dist": 58373
+  },
+  {
+   "lat": 33.259277,
+   "lon": -116.386276,
+   "direction": "Right",
+   "instruction": "Turn right onto Ocotillo Circle",
+   "dist": 60990
+  },
+  {
+   "lat": 33.256515,
+   "lon": -116.383946,
+   "direction": "Sharp Right",
+   "instruction": "Turn sharp right onto Palm Canyon Drive, CR S22",
+   "dist": 61392
+  }
+ ],
+ "stores": [
+  {
+   "lat": 33.256384,
+   "lon": -116.376666,
+   "name": "Village Liquor & Food",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.256304,
+   "lon": -116.383355,
+   "name": "XCEL",
+   "desc": "On route",
+   "category": "fuel"
+  },
+  {
+   "lat": 33.256338,
+   "lon": -116.372692,
+   "name": "Mirage Gas Company",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.256061,
+   "lon": -116.379832,
+   "name": "Desert Pantry Grocers",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.257506,
+   "lon": -116.367638,
+   "name": "Dollar General Market",
+   "desc": "0.1 mi off route · Hours: Mo-Su 08:00-22:00",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.257562,
+   "lon": -116.380006,
+   "name": "Center Market",
+   "desc": "0.1 mi off route",
+   "category": "resupply"
+  }
+ ]
+}

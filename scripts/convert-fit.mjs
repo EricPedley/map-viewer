@@ -2,13 +2,13 @@
 // same compact JSON the app bundles for the GPX route, one file per course.
 // A FIT course has `record` messages (the track) and optional `course_point`
 // messages (named waypoints such as "Water"). Garmin courses carry no
-// turn-by-turn cue text here, so `cues` is empty and the nav banner simply
-// stays hidden for these routes.
-import { readdirSync, readFileSync } from 'node:fs';
+// turn-by-turn cue text, so cues (and extra store POIs) come from the
+// OpenStreetMap data in source-data/osm/ when it exists.
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { Decoder, Stream } from '@garmin/fitsdk';
-import { trackStats, writeRoute } from './route-utils.mjs';
+import { OSM_DIR, trackHash, trackStats, writeRoute } from './route-utils.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fitDir = path.join(__dirname, '..', 'source-data', 'routes');
@@ -46,6 +46,21 @@ for (const file of readdirSync(fitDir).filter((f) => f.toLowerCase().endsWith('.
       desc: '',
     }));
 
+  // Turn cues and convenience-store POIs derived from OpenStreetMap
+  // (scripts/fetch-osm.mjs). Optional: without it the route simply has no
+  // cues and only its own course points.
+  let cues = [];
+  const osmFile = path.join(OSM_DIR, `${id}.json`);
+  if (existsSync(osmFile)) {
+    const osm = JSON.parse(readFileSync(osmFile, 'utf-8'));
+    if (osm.trackHash === trackHash(track)) {
+      cues = osm.cues;
+      pois.push(...osm.stores);
+    } else {
+      console.warn(`${id}: source-data/osm/${id}.json is for a different track — ignoring it (rerun npm run fetch-osm)`);
+    }
+  }
+
   writeRoute({
     id,
     name,
@@ -53,6 +68,6 @@ for (const file of readdirSync(fitDir).filter((f) => f.toLowerCase().endsWith('.
     track,
     ...trackStats(track),
     pois,
-    cues: [],
+    cues,
   });
 }

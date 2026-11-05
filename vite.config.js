@@ -24,9 +24,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: null,
       manifest: {
-        name: 'Of Milk and Navvies — Offline Map',
-        short_name: 'Milk & Navvies',
-        description: 'Offline map viewer for the Of Milk and Navvies bikepacking route (Norway).',
+        name: "Eric's Cycling App",
+        short_name: "Eric's Cycling",
+        description: 'Offline map and turn-by-turn viewer for cycling routes.',
         display: 'standalone',
         background_color: '#14161a',
         theme_color: '#14161a',

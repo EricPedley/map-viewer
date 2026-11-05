@@ -4,3 +4,4 @@ dev-dist
 .vite
 src/data/
 *.local
+.cache

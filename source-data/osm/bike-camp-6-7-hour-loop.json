@@ -1,0 +1,632 @@
+{
+ "id": "bike-camp-6-7-hour-loop",
+ "trackHash": "70ff34b49aee0405",
+ "source": "© OpenStreetMap contributors (ODbL), via the Overpass API",
+ "cues": [
+  {
+   "lat": 33.268613,
+   "lon": -116.405805,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto service road",
+   "dist": 408
+  },
+  {
+   "lat": 33.268611,
+   "lon": -116.404945,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right",
+   "dist": 491
+  },
+  {
+   "lat": 33.256474,
+   "lon": -116.402481,
+   "direction": "Left",
+   "instruction": "Turn left onto Palm Canyon Drive",
+   "dist": 1979
+  },
+  {
+   "lat": 33.256472,
+   "lon": -116.399429,
+   "direction": "Right",
+   "instruction": "Turn right onto Montezuma Valley Road, CR S22",
+   "dist": 2263
+  },
+  {
+   "lat": 33.210363,
+   "lon": -116.543121,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Montezuma Valley Road, CR S22",
+   "dist": 24107
+  },
+  {
+   "lat": 33.219776,
+   "lon": -116.604767,
+   "direction": "Right",
+   "instruction": "Turn right onto San Felipe Valley Road, CR S2",
+   "dist": 30267
+  },
+  {
+   "lat": 33.24935,
+   "lon": -116.673958,
+   "direction": "Left",
+   "instruction": "Turn left onto Route 79, CA 79",
+   "dist": 37788
+  },
+  {
+   "lat": 33.199788,
+   "lon": -116.710295,
+   "direction": "Right",
+   "instruction": "Turn right onto Highway 76, CA 76",
+   "dist": 44693
+  },
+  {
+   "lat": 33.21173,
+   "lon": -116.736831,
+   "direction": "Left",
+   "instruction": "Turn left onto Center Loop",
+   "dist": 47560
+  },
+  {
+   "lat": 33.211645,
+   "lon": -116.738328,
+   "direction": "Left",
+   "instruction": "Turn left onto Mesa Grande Road",
+   "dist": 47705
+  },
+  {
+   "lat": 33.208669,
+   "lon": -116.73488,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Mesa Grande Road",
+   "dist": 48570
+  },
+  {
+   "lat": 33.20797,
+   "lon": -116.738931,
+   "direction": "Right",
+   "instruction": "Turn right onto Mesa Grande Road",
+   "dist": 49137
+  },
+  {
+   "lat": 33.208103,
+   "lon": -116.747139,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Mesa Grande Road",
+   "dist": 50114
+  },
+  {
+   "lat": 33.2071,
+   "lon": -116.748632,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Mesa Grande Road",
+   "dist": 50300
+  },
+  {
+   "lat": 33.199202,
+   "lon": -116.758691,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Mesa Grande Road",
+   "dist": 51631
+  },
+  {
+   "lat": 33.192223,
+   "lon": -116.780023,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Mesa Grande Road",
+   "dist": 54249
+  },
+  {
+   "lat": 33.191795,
+   "lon": -116.779975,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Mesa Grande Road",
+   "dist": 54298
+  },
+  {
+   "lat": 33.185321,
+   "lon": -116.777176,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Mesa Grande Road",
+   "dist": 55096
+  },
+  {
+   "lat": 33.182356,
+   "lon": -116.771929,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Mesa Grande Road",
+   "dist": 55731
+  },
+  {
+   "lat": 33.136985,
+   "lon": -116.681327,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Mesa Grande Road",
+   "dist": 66681
+  },
+  {
+   "lat": 33.13644,
+   "lon": -116.679314,
+   "direction": "Right",
+   "instruction": "Turn right onto Route 79, CA 79",
+   "dist": 66879
+  },
+  {
+   "lat": 33.109196,
+   "lon": -116.673946,
+   "direction": "Left",
+   "instruction": "Turn left onto Old Julian Highway, CA 78;CA 79",
+   "dist": 69976
+  },
+  {
+   "lat": 33.099156,
+   "lon": -116.665265,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Julian Highway, CA 78;CA 79",
+   "dist": 71676
+  },
+  {
+   "lat": 33.098645,
+   "lon": -116.648131,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Julian Highway, CA 78;CA 79",
+   "dist": 74489
+  },
+  {
+   "lat": 33.097234,
+   "lon": -116.646124,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Julian Highway, CA 78;CA 79",
+   "dist": 74735
+  },
+  {
+   "lat": 33.07986,
+   "lon": -116.637421,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Julian Highway, CA 78;CA 79",
+   "dist": 77339
+  },
+  {
+   "lat": 33.0779,
+   "lon": -116.610367,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Julian Road, CA 78;CA 79",
+   "dist": 79911
+  },
+  {
+   "lat": 33.077436,
+   "lon": -116.603628,
+   "direction": "Uturn",
+   "instruction": "Make a U-turn",
+   "dist": 80610
+  },
+  {
+   "lat": 33.0779,
+   "lon": -116.610367,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Julian Road, CA 78;CA 79",
+   "dist": 81308
+  },
+  {
+   "lat": 33.078139,
+   "lon": -116.617271,
+   "direction": "Left",
+   "instruction": "Turn left onto Pine Hills Road, FR 13S07",
+   "dist": 81959
+  },
+  {
+   "lat": 33.056714,
+   "lon": -116.620915,
+   "direction": "Right",
+   "instruction": "Turn right onto Eagle Peak Road, FR 13S06",
+   "dist": 84519
+  },
+  {
+   "lat": 33.054861,
+   "lon": -116.628544,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Eagle Peak Road, FR 13S06",
+   "dist": 85625
+  },
+  {
+   "lat": 33.051865,
+   "lon": -116.633226,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Eagle Peak Road, FR 13S06",
+   "dist": 86297
+  },
+  {
+   "lat": 33.049076,
+   "lon": -116.635277,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Eagle Peak Road, FR 13S06",
+   "dist": 86711
+  },
+  {
+   "lat": 33.048486,
+   "lon": -116.636123,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Boulder Creek Road, FR 13S08",
+   "dist": 86815
+  },
+  {
+   "lat": 33.044482,
+   "lon": -116.635386,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Boulder Creek Road, FR 13S08",
+   "dist": 87293
+  },
+  {
+   "lat": 33.016739,
+   "lon": -116.634837,
+   "direction": "Left",
+   "instruction": "Turn left onto Engineers Road, FR 13S03",
+   "dist": 92063
+  },
+  {
+   "lat": 33.012864,
+   "lon": -116.622226,
+   "direction": "Right",
+   "instruction": "Turn right onto Engineers Road, FR 13S03",
+   "dist": 93780
+  },
+  {
+   "lat": 33.01205,
+   "lon": -116.620941,
+   "direction": "Right",
+   "instruction": "Turn right onto Engineers Road, FR 13S03",
+   "dist": 93931
+  },
+  {
+   "lat": 33.009598,
+   "lon": -116.621173,
+   "direction": "Right",
+   "instruction": "Turn right onto Engineers Road, FR 13S03",
+   "dist": 94245
+  },
+  {
+   "lat": 33.004849,
+   "lon": -116.621179,
+   "direction": "Left",
+   "instruction": "Turn left onto Engineers Road, FR 13S03",
+   "dist": 94915
+  },
+  {
+   "lat": 33.009624,
+   "lon": -116.618244,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Engineers Road, FR 13S03",
+   "dist": 95562
+  },
+  {
+   "lat": 33.01334,
+   "lon": -116.612671,
+   "direction": "Sharp Right",
+   "instruction": "Turn sharp right onto Engineers Road, FR 13S03",
+   "dist": 96331
+  },
+  {
+   "lat": 33.008421,
+   "lon": -116.613871,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Engineers Road, FR 13S03",
+   "dist": 97048
+  },
+  {
+   "lat": 33.003936,
+   "lon": -116.602756,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Engineers Road, FR 13S03",
+   "dist": 99015
+  },
+  {
+   "lat": 33.001167,
+   "lon": -116.598575,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Engineers Road, FR 13S03",
+   "dist": 99593
+  },
+  {
+   "lat": 32.991719,
+   "lon": -116.585782,
+   "direction": "Left",
+   "instruction": "Turn left onto Firefighter Steven Rucker Memorial Highway, CA 79",
+   "dist": 101466
+  },
+  {
+   "lat": 33.010916,
+   "lon": -116.56121,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Firefighter Steven Rucker Memorial Highway, CA 79",
+   "dist": 105176
+  },
+  {
+   "lat": 33.018448,
+   "lon": -116.561398,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Firefighter Steven Rucker Memorial Highway, CA 79",
+   "dist": 106067
+  },
+  {
+   "lat": 33.030656,
+   "lon": -116.563062,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Firefighter Steven Rucker Memorial Highway, CA 79",
+   "dist": 107473
+  },
+  {
+   "lat": 33.039996,
+   "lon": -116.567921,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Firefighter Steven Rucker Memorial Highway, CA 79",
+   "dist": 109077
+  },
+  {
+   "lat": 33.046124,
+   "lon": -116.567461,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Firefighter Steven Rucker Memorial Highway, CA 79",
+   "dist": 109870
+  },
+  {
+   "lat": 33.046557,
+   "lon": -116.567926,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Firefighter Steven Rucker Memorial Highway, CA 79",
+   "dist": 109935
+  },
+  {
+   "lat": 33.076429,
+   "lon": -116.598654,
+   "direction": "Right",
+   "instruction": "Turn right onto Banner Road, CA 78",
+   "dist": 114478
+  },
+  {
+   "lat": 33.078681,
+   "lon": -116.589881,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Banner Road, CA 78",
+   "dist": 115471
+  },
+  {
+   "lat": 33.080242,
+   "lon": -116.589218,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Banner Road, CA 78",
+   "dist": 115659
+  },
+  {
+   "lat": 33.087844,
+   "lon": -116.591899,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Banner Grade, CA 78",
+   "dist": 116579
+  },
+  {
+   "lat": 33.096956,
+   "lon": -116.593907,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Banner Grade, CA 78",
+   "dist": 117949
+  },
+  {
+   "lat": 33.095983,
+   "lon": -116.589721,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Banner Grade, CA 78",
+   "dist": 118451
+  },
+  {
+   "lat": 33.08477,
+   "lon": -116.575218,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left onto Banner Grade, CA 78",
+   "dist": 120537
+  },
+  {
+   "lat": 33.075863,
+   "lon": -116.56176,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Banner Grade, CA 78",
+   "dist": 122571
+  },
+  {
+   "lat": 33.072048,
+   "lon": -116.554594,
+   "direction": "Right",
+   "instruction": "Turn right onto Banner Grade, CA 78",
+   "dist": 123541
+  },
+  {
+   "lat": 33.067698,
+   "lon": -116.5476,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Banner Grade, CA 78",
+   "dist": 125133
+  },
+  {
+   "lat": 33.077119,
+   "lon": -116.533589,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Banner Grade, CA 78",
+   "dist": 126852
+  },
+  {
+   "lat": 33.080719,
+   "lon": -116.524582,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Banner Grade, CA 78",
+   "dist": 127798
+  },
+  {
+   "lat": 33.096824,
+   "lon": -116.475209,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Route 78, CA 78;CR S2",
+   "dist": 132744
+  },
+  {
+   "lat": 33.128686,
+   "lon": -116.425315,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Route 78, CA 78",
+   "dist": 139662
+  },
+  {
+   "lat": 33.129524,
+   "lon": -116.420242,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Route 78, CA 78",
+   "dist": 140143
+  },
+  {
+   "lat": 33.132439,
+   "lon": -116.394732,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Route 78, CA 78",
+   "dist": 142577
+  },
+  {
+   "lat": 33.135635,
+   "lon": -116.380034,
+   "direction": "Left",
+   "instruction": "Turn left onto Yaqui Pass Road, CR S3",
+   "dist": 144043
+  },
+  {
+   "lat": 33.208197,
+   "lon": -116.330016,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Deep Well Trail, CR S3",
+   "dist": 154798
+  },
+  {
+   "lat": 33.211144,
+   "lon": -116.333574,
+   "direction": "Left",
+   "instruction": "Turn left onto Borrego Springs Road, CR S3",
+   "dist": 155278
+  },
+  {
+   "lat": 33.255694,
+   "lon": -116.374925,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Borrego Springs Road, CR S3",
+   "dist": 163490
+  },
+  {
+   "lat": 33.256003,
+   "lon": -116.374782,
+   "direction": "Sharp Left",
+   "instruction": "At the roundabout, take the 7th exit onto Palm Canyon Drive, CR S22",
+   "dist": 163527
+  },
+  {
+   "lat": 33.256568,
+   "lon": -116.376216,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Palm Canyon Drive, CR S22",
+   "dist": 163860
+  },
+  {
+   "lat": 33.256517,
+   "lon": -116.383171,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Palm Canyon Drive, CR S22",
+   "dist": 164507
+  },
+  {
+   "lat": 33.256474,
+   "lon": -116.402481,
+   "direction": "Right",
+   "instruction": "Turn right",
+   "dist": 166304
+  },
+  {
+   "lat": 33.268611,
+   "lon": -116.404945,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto service road",
+   "dist": 167792
+  },
+  {
+   "lat": 33.268683,
+   "lon": -116.405589,
+   "direction": "Slight Left",
+   "instruction": "Turn slight left",
+   "dist": 167853
+  }
+ ],
+ "stores": [
+  {
+   "lat": 33.256384,
+   "lon": -116.376666,
+   "name": "Village Liquor & Food",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.256304,
+   "lon": -116.383355,
+   "name": "XCEL",
+   "desc": "On route",
+   "category": "fuel"
+  },
+  {
+   "lat": 33.068461,
+   "lon": -116.547464,
+   "name": "Banner Store",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.109286,
+   "lon": -116.672277,
+   "name": "The Chairs - BMWOCSD",
+   "desc": "On route",
+   "category": "fuel"
+  },
+  {
+   "lat": 33.256061,
+   "lon": -116.379832,
+   "name": "Desert Pantry Grocers",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.109375,
+   "lon": -116.674967,
+   "name": "Dons Market",
+   "desc": "0.1 mi off route · Hours: Mo-Su 06:00-20:00",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.257562,
+   "lon": -116.380006,
+   "name": "Center Market",
+   "desc": "0.1 mi off route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.076735,
+   "lon": -116.600168,
+   "name": "Ramco",
+   "desc": "0.1 mi off route",
+   "category": "fuel"
+  },
+  {
+   "lat": 33.256338,
+   "lon": -116.372692,
+   "name": "Mirage Gas Company",
+   "desc": "0.1 mi off route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.078079,
+   "lon": -116.602023,
+   "name": "Jack’s Grocery",
+   "desc": "0.1 mi off route",
+   "category": "resupply"
+  }
+ ]
+}

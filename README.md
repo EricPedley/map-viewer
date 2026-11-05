@@ -1,17 +1,16 @@
-# map-viewer
+# Eric's Cycling App
 
-Offline-capable PWA for viewing the [Of Milk and Navvies](https://bikepacking.com/routes/of-milk-and-navvies/)
-bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
+Offline-capable PWA for riding GPS routes with no signal: map, turn-by-turn
+cues, resupply stops and water.
 
 **Live app: https://ericpedley.github.io/map-viewer/**
 
-- Route selector (🗺️ Routes): switch between the Of Milk and Navvies GPX route
-  and the four Garmin "Bike Camp" loop courses. The choice is remembered, and
-  every route's data is precached by the service worker so any of them opens
-  offline.
-- Route track (colored by grade — blue descents, white flat, red climbs) +
-  65 points of interest (resupply, lodging, camping, water, sights) baked
-  in from the official GPX, no network needed to see them.
+- Route selector (🗺️ Routes) for the Garmin "Bike Camp" loop courses
+  (`source-data/routes/*.fit`). The choice is remembered, and every route's
+  data is precached by the service worker so any of them opens offline.
+- Route track colored by grade (blue descents, white flat, red climbs), with
+  water refill points from the course plus convenience stores and gas
+  stations from OpenStreetMap.
 - Satellite basemap (Esri World Imagery).
 - One-tap "Download offline map" caches satellite tiles for a corridor
   around the route (overview down to street-level zoom), so the map keeps
@@ -87,16 +86,56 @@ up lower on screen with more of the road ahead visible above it.
 
 - **Garmin courses (`.fit`)**: drop the file into `source-data/routes/` and
   rebuild. It shows up in the selector automatically, named after the
-  course's own name. Course points (e.g. "Water") become POIs. FIT courses
-  have no turn-cue text, so follow mode's nav banner stays hidden for them.
-  Parsing is done by `scripts/convert-fit.mjs` using Garmin's `@garmin/fitsdk`.
-- **The GPX route**: replace `source-data/route.gpx` (track points in a `<trk>`,
-  named POIs as `<wpt>` elements) and rerun `npm run convert-routes`.
-  Turn-by-turn cues come from a separate `source-data/cues.gpx` cue-sheet
-  export — its waypoints are matched by name against the turn vocabulary in
-  `scripts/convert-gpx.mjs` (`Left`, `Right`, `Slight Left`, etc).
+  course's own name. Course points (e.g. "Water") become POIs. Parsing is
+  done by `scripts/convert-fit.mjs` using Garmin's `@garmin/fitsdk`.
+- **GPX routes (not currently used)**: `scripts/convert-gpx.mjs` can still
+  convert `source-data/route.gpx` (+ `cues.gpx`) into a route; run
+  `npm run convert-gpx` between the clean and index steps of
+  `convert-routes` to add it back. The Of Milk and Navvies route was removed
+  from the selector.
 
 Each route is its own lazy-loaded chunk, so adding routes doesn't slow the
 initial load. The offline tile cache is shared across routes, but "Download
 offline map" fetches the corridor for whichever route is currently selected,
 so run it once per route you plan to ride.
+
+## Turn-by-turn cues and convenience stores from OpenStreetMap
+
+FIT courses have no turn instructions, so these are derived from OSM:
+
+```
+npm run fetch-osm              # new/changed FIT routes
+npm run fetch-osm -- --force   # refetch everything
+```
+
+`scripts/fetch-osm.mjs` asks the Overpass API for the roads within 25 m of
+each route and for convenience stores, supermarkets and gas stations within
+500 m (~0.3 mi). `scripts/osm-turns.mjs` then:
+
+- builds a road graph and finds the junctions the route passes through;
+- measures the route's heading before/after each one to get the turn angle;
+- emits a cue only where a real choice existed (another road branches off) —
+  going straight through a crossroads gets no cue, a Y-fork gets
+  "Keep left/right";
+- names the road you end up on, or describes it ("dirt road", "bike path")
+  when OSM has no name, and collapses roundabouts to "take the 2nd exit";
+- records each cue's exact distance along the route, so loops that retrace
+  a road still count down correctly.
+
+The small derived result is committed in `source-data/osm/<route>.json` and
+merged in by `npm run convert-routes`, so normal builds need no network. It
+records a hash of the track and is ignored (with a warning) if the course is
+re-exported with different geometry. Run `npm run fetch-osm` locally after
+adding or changing a `.fit`, and commit the result. Raw API responses are
+cached in `.cache/` so reruns are fast; the public Overpass servers can be
+slow for the longer routes.
+
+Logic tests (synthetic street grids, forks, roundabouts, store filtering):
+`npm test`.
+
+Stores show as 🛒 Resupply (convenience/supermarket) or ⛽ Gas station POIs,
+with "mi off route" and opening hours when OSM has them. Data © OpenStreetMap
+contributors (ODbL); attribution is shown on the map.
+
+POI filter chips only list categories present in the selected route, so the
+single-day Bike Camp loops show just resupply / water / gas.
