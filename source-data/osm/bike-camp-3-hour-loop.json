@@ -1,0 +1,191 @@
+{
+ "id": "bike-camp-3-hour-loop",
+ "trackHash": "a5e545ba8111e0b4",
+ "source": "© OpenStreetMap contributors (ODbL), via the Overpass API",
+ "cues": [
+  {
+   "lat": 33.256593,
+   "lon": -116.376159,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Palm Canyon Drive, S22",
+   "dist": 2861
+  },
+  {
+   "lat": 33.256383,
+   "lon": -116.37566,
+   "direction": "Straight",
+   "instruction": "At the roundabout, take the 2nd exit onto Borrego Springs Road, S3",
+   "dist": 2911
+  },
+  {
+   "lat": 33.255694,
+   "lon": -116.374925,
+   "direction": "Sharp Left",
+   "instruction": "Turn sharp left onto Borrego Springs Road, S3",
+   "dist": 3019
+  },
+  {
+   "lat": 33.256003,
+   "lon": -116.374782,
+   "direction": "Sharp Left",
+   "instruction": "At the roundabout, take the 7th exit onto Palm Canyon Drive, S22",
+   "dist": 3055
+  },
+  {
+   "lat": 33.256568,
+   "lon": -116.376216,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Palm Canyon Drive, S22",
+   "dist": 3408
+  },
+  {
+   "lat": 33.256517,
+   "lon": -116.383171,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Palm Canyon Drive, S22",
+   "dist": 4055
+  },
+  {
+   "lat": 33.256472,
+   "lon": -116.399429,
+   "direction": "Left",
+   "instruction": "Turn left onto Montezuma Valley Road, S22",
+   "dist": 5566
+  },
+  {
+   "lat": 33.210363,
+   "lon": -116.543121,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Montezuma Valley Road, CR S22",
+   "dist": 27411
+  },
+  {
+   "lat": 33.219776,
+   "lon": -116.604767,
+   "direction": "Left",
+   "instruction": "Turn left onto San Felipe Road, CR S2",
+   "dist": 33571
+  },
+  {
+   "lat": 33.179302,
+   "lon": -116.579093,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto San Felipe Road, CR S2",
+   "dist": 38987
+  },
+  {
+   "lat": 33.098543,
+   "lon": -116.470873,
+   "direction": "Left",
+   "instruction": "Turn left onto Route 78, CA 78",
+   "dist": 53108
+  },
+  {
+   "lat": 33.128686,
+   "lon": -116.425315,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Route 78, CA 78",
+   "dist": 59579
+  },
+  {
+   "lat": 33.129524,
+   "lon": -116.420242,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Route 78, CA 78",
+   "dist": 60061
+  },
+  {
+   "lat": 33.132439,
+   "lon": -116.394732,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Route 78, CA 78",
+   "dist": 62495
+  },
+  {
+   "lat": 33.135635,
+   "lon": -116.380034,
+   "direction": "Left",
+   "instruction": "Turn left onto Yaqui Pass Road, S3",
+   "dist": 63960
+  },
+  {
+   "lat": 33.208197,
+   "lon": -116.330016,
+   "direction": "Slight Left",
+   "instruction": "Keep left onto Deep Well Trail, S3",
+   "dist": 74713
+  },
+  {
+   "lat": 33.211144,
+   "lon": -116.333574,
+   "direction": "Left",
+   "instruction": "Turn left onto Borrego Springs Road, S3",
+   "dist": 75193
+  },
+  {
+   "lat": 33.255694,
+   "lon": -116.374925,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Borrego Springs Road, S3",
+   "dist": 83407
+  },
+  {
+   "lat": 33.256003,
+   "lon": -116.374782,
+   "direction": "Sharp Left",
+   "instruction": "At the roundabout, take the 7th exit onto Palm Canyon Drive, S22",
+   "dist": 83444
+  },
+  {
+   "lat": 33.256568,
+   "lon": -116.376216,
+   "direction": "Slight Right",
+   "instruction": "Turn slight right onto Palm Canyon Drive, S22",
+   "dist": 83777
+  },
+  {
+   "lat": 33.256517,
+   "lon": -116.383171,
+   "direction": "Slight Right",
+   "instruction": "Keep right onto Palm Canyon Drive, S22",
+   "dist": 84424
+  }
+ ],
+ "stores": [
+  {
+   "lat": 33.256384,
+   "lon": -116.376666,
+   "name": "Village Liquor & Food",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.256304,
+   "lon": -116.383355,
+   "name": "XCEL",
+   "desc": "On route",
+   "category": "fuel"
+  },
+  {
+   "lat": 33.256061,
+   "lon": -116.379832,
+   "name": "Desert Pantry Grocers",
+   "desc": "On route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.257562,
+   "lon": -116.380006,
+   "name": "Center Market",
+   "desc": "0.1 mi off route",
+   "category": "resupply"
+  },
+  {
+   "lat": 33.256338,
+   "lon": -116.372692,
+   "name": "Mirage Gas Company",
+   "desc": "0.1 mi off route",
+   "category": "resupply"
+  }
+ ]
+}
