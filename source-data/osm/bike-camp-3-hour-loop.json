@@ -7,49 +7,49 @@
    "lat": 33.256593,
    "lon": -116.376159,
    "direction": "Slight Right",
-   "instruction": "Turn slight right onto Palm Canyon Drive, S22",
+   "instruction": "Turn slight right onto Palm Canyon Drive, CR S22",
    "dist": 2861
   },
   {
    "lat": 33.256383,
    "lon": -116.37566,
    "direction": "Straight",
-   "instruction": "At the roundabout, take the 2nd exit onto Borrego Springs Road, S3",
+   "instruction": "At the roundabout, take the 2nd exit onto Borrego Springs Road, CR S3",
    "dist": 2911
   },
   {
    "lat": 33.255694,
    "lon": -116.374925,
    "direction": "Sharp Left",
-   "instruction": "Turn sharp left onto Borrego Springs Road, S3",
+   "instruction": "Turn sharp left onto Borrego Springs Road, CR S3",
    "dist": 3019
   },
   {
    "lat": 33.256003,
    "lon": -116.374782,
    "direction": "Sharp Left",
-   "instruction": "At the roundabout, take the 7th exit onto Palm Canyon Drive, S22",
+   "instruction": "At the roundabout, take the 7th exit onto Palm Canyon Drive, CR S22",
    "dist": 3055
   },
   {
    "lat": 33.256568,
    "lon": -116.376216,
    "direction": "Slight Right",
-   "instruction": "Turn slight right onto Palm Canyon Drive, S22",
+   "instruction": "Turn slight right onto Palm Canyon Drive, CR S22",
    "dist": 3408
   },
   {
    "lat": 33.256517,
    "lon": -116.383171,
    "direction": "Slight Right",
-   "instruction": "Keep right onto Palm Canyon Drive, S22",
+   "instruction": "Keep right onto Palm Canyon Drive, CR S22",
    "dist": 4055
   },
   {
    "lat": 33.256472,
    "lon": -116.399429,
    "direction": "Left",
-   "instruction": "Turn left onto Montezuma Valley Road, S22",
+   "instruction": "Turn left onto Montezuma Valley Road, CR S22",
    "dist": 5566
   },
   {
@@ -105,49 +105,49 @@
    "lat": 33.135635,
    "lon": -116.380034,
    "direction": "Left",
-   "instruction": "Turn left onto Yaqui Pass Road, S3",
+   "instruction": "Turn left onto Yaqui Pass Road, CR S3",
    "dist": 63960
   },
   {
    "lat": 33.208197,
    "lon": -116.330016,
    "direction": "Slight Left",
-   "instruction": "Keep left onto Deep Well Trail, S3",
+   "instruction": "Keep left onto Deep Well Trail, CR S3",
    "dist": 74713
   },
   {
    "lat": 33.211144,
    "lon": -116.333574,
    "direction": "Left",
-   "instruction": "Turn left onto Borrego Springs Road, S3",
+   "instruction": "Turn left onto Borrego Springs Road, CR S3",
    "dist": 75193
   },
   {
    "lat": 33.255694,
    "lon": -116.374925,
    "direction": "Slight Right",
-   "instruction": "Turn slight right onto Borrego Springs Road, S3",
+   "instruction": "Turn slight right onto Borrego Springs Road, CR S3",
    "dist": 83407
   },
   {
    "lat": 33.256003,
    "lon": -116.374782,
    "direction": "Sharp Left",
-   "instruction": "At the roundabout, take the 7th exit onto Palm Canyon Drive, S22",
+   "instruction": "At the roundabout, take the 7th exit onto Palm Canyon Drive, CR S22",
    "dist": 83444
   },
   {
    "lat": 33.256568,
    "lon": -116.376216,
    "direction": "Slight Right",
-   "instruction": "Turn slight right onto Palm Canyon Drive, S22",
+   "instruction": "Turn slight right onto Palm Canyon Drive, CR S22",
    "dist": 83777
   },
   {
    "lat": 33.256517,
    "lon": -116.383171,
    "direction": "Slight Right",
-   "instruction": "Keep right onto Palm Canyon Drive, S22",
+   "instruction": "Keep right onto Palm Canyon Drive, CR S22",
    "dist": 84424
   }
  ],
