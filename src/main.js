@@ -2,7 +2,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './style.css';
 import routesIndex from './data/routes-index.json';
-import { categorize, allCategories } from './poi.js';
+import { poiCategory, allCategories } from './poi.js';
 import {
   SATELLITE_URL_TEMPLATE,
   computeCorridorTiles,
@@ -35,7 +35,9 @@ const satellite = L.tileLayer(SATELLITE_URL_TEMPLATE, {
   // needs to be generous enough that the whole enlarged area gets tiles,
   // not just the part that happened to already be visible pre-enlarge.
   keepBuffer: 10,
-  attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+  attribution:
+    'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community' +
+    ' | Turn cues &amp; stores &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
 
 // ---------- Routes ----------
@@ -80,7 +82,7 @@ function drawRoute() {
   }
 
   poiMarkers = route.pois.map((poi) => {
-    const cat = categorize(poi.name);
+    const cat = poiCategory(poi);
     const marker = L.marker([poi.lat, poi.lon], { icon: poiDivIcon(cat) });
     marker.bindPopup(
       `<strong>${escapeHtml(poi.name)}</strong>` +
@@ -143,8 +145,7 @@ const topBarEl = document.getElementById('top-bar');
 function positionPanels() {
   const top = `${Math.round(topBarEl.getBoundingClientRect().bottom + 4)}px`;
   document.querySelectorAll('.panel:not(.panel-bottom)').forEach((el) => (el.style.top = top));
-  const toast = document.getElementById('route-status');
-  if (toast) toast.style.top = top;
+  document.querySelectorAll('.toast').forEach((el) => (el.style.top = top));
 }
 window.addEventListener('resize', positionPanels);
 
@@ -182,7 +183,9 @@ document.querySelectorAll('.panel-close').forEach((btn) => {
 const poiList = document.getElementById('poi-list');
 const poiFilters = document.getElementById('poi-filters');
 const poiSubtitle = document.getElementById('poi-subtitle');
-const activeCategories = new Set(allCategories().map((c) => c.id));
+// Categories the user has switched off. Kept across route changes; only
+// categories that actually occur in the current route get a filter chip.
+const hiddenCategories = new Set();
 
 // Set from the location tracker's onPosition callback; null while location
 // tracking is off, in which case the list just shows the whole route in order.
@@ -190,17 +193,22 @@ let currentMileageMeters = null;
 
 function renderPoiFilters() {
   poiFilters.innerHTML = '';
-  for (const cat of allCategories()) {
+  const present = new Set(route.pois.map((p) => poiCategory(p).id));
+  // Most categories (camping, lodging, ferry...) only make sense on
+  // multi-day routes, so a route only offers filters for what it contains.
+  // A single category isn't worth a filter bar.
+  poiFilters.hidden = present.size < 2;
+  for (const cat of allCategories().filter((c) => present.has(c.id))) {
     const btn = document.createElement('button');
-    btn.className = 'filter-chip active';
+    btn.className = 'filter-chip' + (hiddenCategories.has(cat.id) ? '' : ' active');
     btn.textContent = `${cat.emoji} ${cat.label}`;
     btn.addEventListener('click', () => {
-      if (activeCategories.has(cat.id)) {
-        activeCategories.delete(cat.id);
-        btn.classList.remove('active');
-      } else {
-        activeCategories.add(cat.id);
+      if (hiddenCategories.has(cat.id)) {
+        hiddenCategories.delete(cat.id);
         btn.classList.add('active');
+      } else {
+        hiddenCategories.add(cat.id);
+        btn.classList.remove('active');
       }
       applyFilters();
     });
@@ -210,7 +218,7 @@ function renderPoiFilters() {
 
 function applyFilters() {
   poiMarkers.forEach((m) => {
-    const show = activeCategories.has(m.category);
+    const show = !hiddenCategories.has(m.category);
     const el = m.getElement();
     if (el) el.style.display = show ? '' : 'none';
   });
@@ -234,8 +242,8 @@ function renderPoiListItems() {
   }
 
   const rows = route.pois
-    .map((poi, i) => ({ poi, i, cat: categorize(poi.name), dist: poiRouteDistance[i] }))
-    .filter((row) => activeCategories.has(row.cat.id))
+    .map((poi, i) => ({ poi, i, cat: poiCategory(poi), dist: poiRouteDistance[i] }))
+    .filter((row) => !hiddenCategories.has(row.cat.id))
     .filter((row) => !tracking || row.dist >= currentMileageMeters)
     .sort((a, b) => a.dist - b.dist);
 
@@ -256,7 +264,6 @@ function renderPoiListItems() {
   }
 }
 
-renderPoiFilters();
 
 // ---------- Elevation profile ----------
 function renderElevation() {
@@ -463,6 +470,7 @@ const locationTracker = createLocationTracker(map, {
   onStatus: ({ tracking, following, error, headingState }) => {
     btnLocate.classList.toggle('active', tracking && following);
     btnLocate.classList.toggle('stale', tracking && !following);
+    positionPanels();
     if (error) {
       locateStatus.hidden = false;
       locateStatus.textContent = error;
@@ -580,12 +588,16 @@ async function selectRoute(id, { fit = true } = {}) {
   poiRouteDistance = route.pois.map((poi) =>
     nearestRouteDistanceMeters(route.track, route.distances, poi.lat, poi.lon)
   );
-  cueRouteDistance = route.cues.map((cue) =>
-    nearestRouteDistanceMeters(route.track, route.distances, cue.lat, cue.lon)
+  // OSM-derived cues carry their exact distance along the route (`dist`),
+  // which matters on loops that retrace a road; GPX cues are located by
+  // nearest-point lookup.
+  cueRouteDistance = route.cues.map(
+    (cue) => cue.dist ?? nearestRouteDistanceMeters(route.track, route.distances, cue.lat, cue.lon)
   );
 
   // Hide markers for categories the user has filtered out, then refresh
   // everything else that shows route-specific data.
+  renderPoiFilters();
   applyFilters();
   renderElevation();
   hoverMarker.setStyle({ opacity: 0, fillOpacity: 0 });

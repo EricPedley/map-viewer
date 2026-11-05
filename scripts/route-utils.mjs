@@ -52,3 +52,17 @@ export function writeRoute(route) {
       `+${route.elevationGainMeters}m/-${route.elevationLossMeters}m`
   );
 }
+
+// Fingerprint of a route's geometry. The OSM-derived data in source-data/osm/
+// is only valid for the exact track it was computed from, so it records this
+// hash and the converter ignores (with a warning) a file whose hash no longer
+// matches — e.g. after the .fit course was edited and re-exported.
+import { createHash } from 'node:crypto';
+export function trackHash(track) {
+  return createHash('sha1')
+    .update(track.map(([lat, lon]) => `${lat},${lon}`).join(';'))
+    .digest('hex')
+    .slice(0, 16);
+}
+
+export const OSM_DIR = path.join(__dirname, '..', 'source-data', 'osm');

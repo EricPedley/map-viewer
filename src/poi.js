@@ -44,11 +44,25 @@ const CATEGORIES = [
     match: /cafe|canteen|coffee|restaurant/i,
   },
   {
-    id: 'water',
+    id: 'swim',
     emoji: '🏊',
-    label: 'Swimming / water',
+    label: 'Swimming',
     color: '#1098ad',
-    match: /swim|lake|vasskanten|water/i,
+    match: /swim|lake|vasskanten/i,
+  },
+  {
+    id: 'water',
+    emoji: '💧',
+    label: 'Water refill',
+    color: '#1971c2',
+    match: /water|fountain|refill|spigot|tap\b/i,
+  },
+  {
+    id: 'fuel',
+    emoji: '⛽',
+    label: 'Gas station',
+    color: '#c92a2a',
+    match: /gas station|fuel|petrol/i,
   },
   {
     id: 'sight',
@@ -70,4 +84,14 @@ export function categorize(name) {
 
 export function allCategories() {
   return [...CATEGORIES, DEFAULT_CATEGORY];
+}
+
+// A POI can carry an explicit `category` id (OSM-derived stores do, since
+// their names are arbitrary brands); otherwise fall back to name matching.
+export function poiCategory(poi) {
+  if (poi.category) {
+    const explicit = allCategories().find((c) => c.id === poi.category);
+    if (explicit) return explicit;
+  }
+  return categorize(poi.name);
 }

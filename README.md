@@ -87,9 +87,8 @@ up lower on screen with more of the road ahead visible above it.
 
 - **Garmin courses (`.fit`)**: drop the file into `source-data/routes/` and
   rebuild. It shows up in the selector automatically, named after the
-  course's own name. Course points (e.g. "Water") become POIs. FIT courses
-  have no turn-cue text, so follow mode's nav banner stays hidden for them.
-  Parsing is done by `scripts/convert-fit.mjs` using Garmin's `@garmin/fitsdk`.
+  course's own name. Course points (e.g. "Water") become POIs. Parsing is
+  done by `scripts/convert-fit.mjs` using Garmin's `@garmin/fitsdk`.
 - **The GPX route**: replace `source-data/route.gpx` (track points in a `<trk>`,
   named POIs as `<wpt>` elements) and rerun `npm run convert-routes`.
   Turn-by-turn cues come from a separate `source-data/cues.gpx` cue-sheet
@@ -100,3 +99,43 @@ Each route is its own lazy-loaded chunk, so adding routes doesn't slow the
 initial load. The offline tile cache is shared across routes, but "Download
 offline map" fetches the corridor for whichever route is currently selected,
 so run it once per route you plan to ride.
+
+## Turn-by-turn cues and convenience stores from OpenStreetMap
+
+FIT courses have no turn instructions, so these are derived from OSM:
+
+```
+npm run fetch-osm              # new/changed FIT routes
+npm run fetch-osm -- --force   # refetch everything
+```
+
+`scripts/fetch-osm.mjs` asks the Overpass API for the roads within 25 m of
+each route and for convenience stores, supermarkets and gas stations within
+500 m (~0.3 mi). `scripts/osm-turns.mjs` then:
+
+- builds a road graph and finds the junctions the route passes through;
+- measures the route's heading before/after each one to get the turn angle;
+- emits a cue only where a real choice existed (another road branches off) —
+  going straight through a crossroads gets no cue, a Y-fork gets
+  "Keep left/right";
+- names the road you end up on, or describes it ("dirt road", "bike path")
+  when OSM has no name, and collapses roundabouts to "take the 2nd exit";
+- records each cue's exact distance along the route, so loops that retrace
+  a road still count down correctly.
+
+The small derived result is committed in `source-data/osm/<route>.json` and
+merged in by `npm run convert-routes`, so normal builds need no network. It
+records a hash of the track and is ignored (with a warning) if the course is
+re-exported with different geometry. The **Fetch OSM data** GitHub Action
+runs the fetch automatically when a `.fit` or the derivation code changes
+(and on demand from the Actions tab) and commits the result.
+
+Logic tests (synthetic street grids, forks, roundabouts, store filtering):
+`npm test`.
+
+Stores show as 🛒 Resupply (convenience/supermarket) or ⛽ Gas station POIs,
+with "mi off route" and opening hours when OSM has them. Data © OpenStreetMap
+contributors (ODbL); attribution is shown on the map.
+
+POI filter chips only list categories present in the selected route, so the
+single-day Bike Camp loops show just resupply / water / gas.

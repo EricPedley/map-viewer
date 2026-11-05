@@ -1,7 +1,7 @@
 {
   "name": "of-milk-and-navvies-offline-map",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
     "predev": "npm run convert-routes",
@@ -11,6 +11,8 @@
     "preview": "vite preview",
     "convert-routes": "node scripts/convert-gpx.mjs && node scripts/convert-fit.mjs && node scripts/build-route-index.mjs",
     "convert-gpx": "npm run convert-routes",
+    "fetch-osm": "npm run convert-routes && node scripts/fetch-osm.mjs",
+    "test": "node --test scripts/osm-turns.test.mjs",
     "make-icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
