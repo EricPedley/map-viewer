@@ -10,6 +10,11 @@
 
 * { box-sizing: border-box; }
 
+/* Author `display` rules (e.g. .nav-banner { display: flex }) would otherwise
+   override the browser's default [hidden] styling and leave empty elements
+   visible. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   height: 100%;
