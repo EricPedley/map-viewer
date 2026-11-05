@@ -24,11 +24,11 @@ const FIT_DIR = path.join(__dirname, '..', 'source-data', 'routes');
 const CACHE_DIR = path.join(__dirname, '..', '.cache', 'overpass');
 
 // Public Overpass instances, tried in order. Be a polite client: identify
-// ourselves, run requests one at a time, back off on 429/504.
+// ourselves, run requests one at a time, back off on 429/504. (kumi.systems
+// and private.coffee were dropped: they timed out or returned empty results.)
 const ENDPOINTS = process.env.OVERPASS_URL ? [process.env.OVERPASS_URL] : [
   'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.private.coffee/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 const USER_AGENT = 'map-viewer-osm-fetch/1.0 (+https://github.com/EricPedley/map-viewer)';
 const ROAD_RADIUS_METERS = 25; // roads this close to the route are loaded (incl. side roads at junctions)
@@ -38,10 +38,18 @@ const NON_BIKEABLE = 'motorway|motorway_link|footway|steps|pedestrian|corridor|c
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function overpass(query) {
+// allowEmpty: whether zero elements is a legitimate answer. Every chunk of a
+// route is on some road, so an empty roads response means an overloaded server
+// silently gave up — treat it as a failure (retry, never cache). A stretch with
+// no stores is real, so store queries pass allowEmpty: true.
+async function overpass(query, { allowEmpty = false } = {}) {
   mkdirSync(CACHE_DIR, { recursive: true });
   const cacheFile = path.join(CACHE_DIR, createHash('sha1').update(query).digest('hex') + '.json');
-  if (existsSync(cacheFile)) return JSON.parse(readFileSync(cacheFile, 'utf-8'));
+  if (existsSync(cacheFile)) {
+    const cached = JSON.parse(readFileSync(cacheFile, 'utf-8'));
+    if (allowEmpty || cached.elements?.length) return cached;
+    console.warn('  ignoring cached empty response, refetching');
+  }
 
   let lastErr;
   for (let attempt = 0; attempt < 6; attempt++) {
@@ -55,6 +63,8 @@ async function overpass(query) {
       if (!res.ok) throw new Error(`${endpoint} -> HTTP ${res.status}`);
       const json = await res.json();
       if (json.remark && /error|timed out/i.test(json.remark)) throw new Error(`${endpoint} -> ${json.remark}`);
+      if (!Array.isArray(json.elements)) throw new Error(`${endpoint} -> response has no elements array`);
+      if (!allowEmpty && json.elements.length === 0) throw new Error(`${endpoint} -> empty result`);
       writeFileSync(cacheFile, JSON.stringify(json));
       await sleep(1500);
       return json;
@@ -104,7 +114,8 @@ async function processRoute(id, force) {
     console.log(`  chunk ${n + 1}/${pieces.length}: stores`);
     const shops = await overpass(
       `[out:json][timeout:180];(nwr["shop"~"^(convenience|supermarket|grocery|general)$"](around:${STORE_RADIUS_METERS},${coords});` +
-        `nwr["amenity"="fuel"](around:${STORE_RADIUS_METERS},${coords}););out center tags;`
+        `nwr["amenity"="fuel"](around:${STORE_RADIUS_METERS},${coords}););out center tags;`,
+      { allowEmpty: true }
     );
     for (const el of shops.elements) stores.set(`${el.type}/${el.id}`, el);
   }

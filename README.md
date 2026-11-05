@@ -129,6 +129,9 @@ re-exported with different geometry. Run `npm run fetch-osm` locally after
 adding or changing a `.fit`, and commit the result. Raw API responses are
 cached in `.cache/` so reruns are fast; the public Overpass servers can be
 slow for the longer routes.
+Overloaded servers sometimes answer with an empty result instead of an
+error, so an empty roads response is treated as a failure and retried, never
+cached. Set `OVERPASS_URL=...` to pin a specific server.
 
 Logic tests (synthetic street grids, forks, roundabouts, store filtering):
 `npm test`.
