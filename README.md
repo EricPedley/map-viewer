@@ -5,6 +5,10 @@ bikepacking route (Mjølkevegen and Rallarvegen, Norway) with no signal.
 
 **Live app: https://ericpedley.github.io/map-viewer/**
 
+- Route selector (🗺️ Routes): switch between the Of Milk and Navvies GPX route
+  and the four Garmin "Bike Camp" loop courses. The choice is remembered, and
+  every route's data is precached by the service worker so any of them opens
+  offline.
 - Route track (colored by grade — blue descents, white flat, red climbs) +
   65 points of interest (resupply, lodging, camping, water, sights) baked
   in from the official GPX, no network needed to see them.
@@ -35,9 +39,10 @@ npm install
 npm run dev
 ```
 
-`npm run dev` / `npm run build` first regenerate `src/data/route.json` from
-`source-data/route.gpx` (see `scripts/convert-gpx.mjs`), then start Vite /
-produce a production build in `dist/`.
+`npm run dev` / `npm run build` first run `npm run convert-routes`, which
+regenerates `src/data/routes/*.json` (one file per route) and
+`src/data/routes-index.json` (the list the selector reads) from
+`source-data/`, then start Vite / produce a production build in `dist/`.
 
 ## Deploying
 
@@ -78,11 +83,20 @@ map on a point projected ~70m ahead of the rider along their heading
 (`destinationPoint` in `src/projection.js`), so the rider's actual dot ends
 up lower on screen with more of the road ahead visible above it.
 
-## Updating the route
+## Updating / adding routes
 
-Replace `source-data/route.gpx` with a new GPX (track points in a `<trk>`,
-named POIs as `<wpt>` elements) and rerun `npm run convert-gpx` (or just
-`npm run dev` / `npm run build`, which do it automatically). Turn-by-turn
-cues (for follow mode's nav banner) come from a separate `source-data/cues.gpx`
-cue-sheet export — its waypoints are matched by name against the turn
-vocabulary in `scripts/convert-gpx.mjs` (`Left`, `Right`, `Slight Left`, etc).
+- **Garmin courses (`.fit`)**: drop the file into `source-data/routes/` and
+  rebuild. It shows up in the selector automatically, named after the
+  course's own name. Course points (e.g. "Water") become POIs. FIT courses
+  have no turn-cue text, so follow mode's nav banner stays hidden for them.
+  Parsing is done by `scripts/convert-fit.mjs` using Garmin's `@garmin/fitsdk`.
+- **The GPX route**: replace `source-data/route.gpx` (track points in a `<trk>`,
+  named POIs as `<wpt>` elements) and rerun `npm run convert-routes`.
+  Turn-by-turn cues come from a separate `source-data/cues.gpx` cue-sheet
+  export — its waypoints are matched by name against the turn vocabulary in
+  `scripts/convert-gpx.mjs` (`Left`, `Right`, `Slight Left`, etc).
+
+Each route is its own lazy-loaded chunk, so adding routes doesn't slow the
+initial load. The offline tile cache is shared across routes, but "Download
+offline map" fetches the corridor for whichever route is currently selected,
+so run it once per route you plan to ride.
