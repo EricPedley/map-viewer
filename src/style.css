@@ -406,3 +406,39 @@ html, body {
     max-width: none;
   }
 }
+
+/* ---------- Route selector ---------- */
+.chip-route {
+  max-width: 48vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toast-info { background: rgba(30, 33, 38, 0.95); border: 1px solid var(--border); }
+
+.panel-header h2 { overflow-wrap: anywhere; }
+.panel-subtitle { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+#route-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#route-list li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+#route-list li:hover { background: rgba(255, 255, 255, 0.04); }
+#route-list li.selected { background: rgba(255, 90, 31, 0.12); }
+
+.route-check { flex: 0 0 18px; color: var(--accent); font-weight: bold; text-align: center; }
+.route-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.route-name { font-size: 14px; }
+.route-meta { color: var(--muted); font-size: 12px; }

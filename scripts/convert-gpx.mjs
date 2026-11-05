@@ -1,14 +1,14 @@
 // Converts the source GPX route into a compact JSON file bundled into the app,
 // so the track/POIs are available offline without a runtime fetch or GPX parser.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { DOMParser } from '@xmldom/xmldom';
+import { trackStats, writeRoute } from './route-utils.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const gpxPath = path.join(__dirname, '..', 'source-data', 'route.gpx');
 const cuesPath = path.join(__dirname, '..', 'source-data', 'cues.gpx');
-const outPath = path.join(__dirname, '..', 'src', 'data', 'route.json');
 
 const xml = readFileSync(gpxPath, 'utf-8');
 const doc = new DOMParser().parseFromString(xml, 'text/xml');
@@ -72,47 +72,13 @@ for (let i = 0; i < cueWpts.length; i++) {
   cues.push({ lat, lon, direction, instruction });
 }
 
-// Cumulative distance (meters) along the track, using the haversine formula,
-// so the elevation profile can be plotted against distance instead of point index.
-function haversine(a, b) {
-  const R = 6371000;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(b[0] - a[0]);
-  const dLon = toRad(b[1] - a[1]);
-  const lat1 = toRad(a[0]);
-  const lat2 = toRad(b[0]);
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
-
-let dist = 0;
-let gain = 0;
-let loss = 0;
-const distances = [0];
-for (let i = 1; i < track.length; i++) {
-  dist += haversine(track[i - 1], track[i]);
-  distances.push(dist);
-  const d = track[i][2] - track[i - 1][2];
-  if (d > 0) gain += d;
-  else loss += -d;
-}
-
-const data = {
+const id = 'of-milk-and-navvies';
+writeRoute({
+  id,
   name: 'Of Milk and Navvies (Mjølkevegen and Rallarvegen)',
   source: 'https://bikepacking.com/routes/of-milk-and-navvies/',
   track,
-  distances,
-  totalDistanceMeters: Math.round(dist),
-  elevationGainMeters: Math.round(gain),
-  elevationLossMeters: Math.round(loss),
+  ...trackStats(track),
   pois,
   cues,
-};
-
-mkdirSync(path.dirname(outPath), { recursive: true });
-writeFileSync(outPath, JSON.stringify(data));
-console.log(
-  `Wrote ${outPath}: ${track.length} track points, ${pois.length} POIs, ${cues.length} turn cues, ` +
-    `${(dist / 1000).toFixed(1)} km, +${Math.round(gain)}m/-${Math.round(loss)}m`
-);
+});

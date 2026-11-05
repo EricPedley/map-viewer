@@ -2,5 +2,5 @@ node_modules
 dist
 dev-dist
 .vite
-src/data/route.json
+src/data/
 *.local

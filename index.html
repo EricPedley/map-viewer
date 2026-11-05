@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1a1a1a" />
-    <meta name="description" content="Offline map viewer for the Of Milk and Navvies bikepacking route (Mjølkevegen and Rallarvegen, Norway)." />
+    <meta name="description" content="Offline map viewer for bikepacking routes: Of Milk and Navvies (Norway) and Bike Camp loops." />
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icons/icon-180.png" />
-    <title>Of Milk and Navvies — Offline Map</title>
+    <title>Offline Bikepacking Map</title>
   </head>
   <body>
     <div id="map-perspective">
@@ -25,6 +25,7 @@
     </div>
 
     <div id="top-bar">
+      <button id="btn-routes" class="chip chip-route" aria-label="Choose a route">🗺️ Routes</button>
       <button id="btn-pois" class="chip" aria-label="Points of interest">📍 POIs</button>
       <button id="btn-elevation" class="chip" aria-label="Elevation profile">⛰️ Elevation</button>
       <button id="btn-offline" class="chip" aria-label="Offline downloads">⬇️ Offline</button>
@@ -36,6 +37,16 @@
     </div>
 
     <div id="locate-status" class="toast" hidden></div>
+    <div id="route-status" class="toast toast-info" hidden></div>
+
+    <div id="panel-routes" class="panel" hidden>
+      <div class="panel-header">
+        <h2>Routes</h2>
+        <button class="panel-close" data-close="panel-routes">✕</button>
+      </div>
+      <p class="panel-note">Pick a route. Every route's track and points of interest work offline.</p>
+      <ul id="route-list"></ul>
+    </div>
 
     <div id="panel-pois" class="panel" hidden>
       <div class="panel-header">
@@ -49,7 +60,10 @@
 
     <div id="panel-elevation" class="panel panel-bottom" hidden>
       <div class="panel-header">
-        <h2 id="route-stats"></h2>
+        <div>
+          <h2 id="route-name"></h2>
+          <div id="route-stats" class="panel-subtitle"></div>
+        </div>
         <button class="panel-close" data-close="panel-elevation">✕</button>
       </div>
       <div id="elevation-chart"></div>
@@ -61,9 +75,10 @@
         <button class="panel-close" data-close="panel-offline">✕</button>
       </div>
       <p class="panel-note">
-        Downloads satellite imagery for a corridor around the route (overview down to
-        street-level detail) so the map works with no signal. Do this once while you
-        have wifi, before you leave — it's about 175 MB.
+        Downloads satellite imagery for a corridor around
+        <strong id="offline-route-name"></strong> (overview down to street-level detail)
+        so the map works with no signal. Do this once per route while you have wifi,
+        before you leave — this route is <span id="offline-estimate"></span>.
       </p>
       <div id="offline-status" class="offline-status"></div>
       <div class="offline-actions">
