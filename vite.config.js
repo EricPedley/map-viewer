@@ -4,11 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
-// Served from https://<user>.github.io/map-viewer/ (a GitHub Pages project
-// site), so every asset URL needs this prefix — set base accordingly rather
-// than using root-absolute paths.
+// Served from the root of the custom domain https://navigation.ericpedley.com/
+// (GitHub Pages custom domain), so assets resolve from '/'.
 export default defineConfig({
-  base: '/map-viewer/',
+  base: '/',
   define: {
     // package.json's version is the single source of truth for the version
     // shown in the app — bump it there when tagging a release.
@@ -31,9 +30,7 @@ export default defineConfig({
         background_color: '#14161a',
         theme_color: '#14161a',
         // No leading slash: vite-plugin-pwa prepends the resolved `base`
-        // (see base: '/map-viewer/' above) to these itself. A leading slash
-        // would be taken as already-absolute and left un-prefixed, breaking
-        // icons/start_url when served from a GitHub Pages project subpath.
+        // (see `base` above) to these itself.
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },

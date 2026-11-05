@@ -3,7 +3,7 @@
 Offline-capable PWA for riding GPS routes with no signal: map, turn-by-turn
 cues, resupply stops and water.
 
-**Live app: https://ericpedley.github.io/map-viewer/**
+**Live app: https://navigation.ericpedley.com/**
 
 - Route selector (🗺️ Routes) for the Garmin "Bike Camp" loop courses
   (`source-data/routes/*.fit`). The choice is remembered, and every route's
