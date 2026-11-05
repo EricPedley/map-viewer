@@ -125,9 +125,10 @@ each route and for convenience stores, supermarkets and gas stations within
 The small derived result is committed in `source-data/osm/<route>.json` and
 merged in by `npm run convert-routes`, so normal builds need no network. It
 records a hash of the track and is ignored (with a warning) if the course is
-re-exported with different geometry. The **Fetch OSM data** GitHub Action
-runs the fetch automatically when a `.fit` or the derivation code changes
-(and on demand from the Actions tab) and commits the result.
+re-exported with different geometry. Run `npm run fetch-osm` locally after
+adding or changing a `.fit`, and commit the result. Raw API responses are
+cached in `.cache/` so reruns are fast; the public Overpass servers can be
+slow for the longer routes.
 
 Logic tests (synthetic street grids, forks, roundabouts, store filtering):
 `npm test`.

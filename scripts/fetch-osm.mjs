@@ -3,9 +3,8 @@
 //   - turn-by-turn cues  (roads near the route -> junctions the route turns at)
 //   - convenience-store / gas-station POIs within ~0.3 mi of the route
 // The small derived result is written to source-data/osm/<route-id>.json and
-// committed, so normal builds need no network and are reproducible. Re-run
-// this when a route is added or changed (or let the "Fetch OSM data" GitHub
-// Action do it):
+// committed, so normal builds need no network and are reproducible. Run this
+// on your own machine when a route is added or changed, then commit the result:
 //
 //   npm run fetch-osm                 # every FIT route that's new or changed
 //   npm run fetch-osm -- --force      # refetch everything
@@ -109,6 +108,10 @@ async function processRoute(id, force) {
     );
     for (const el of shops.elements) stores.set(`${el.type}/${el.id}`, el);
   }
+
+  // An empty road set means the API silently returned nothing (overloaded
+  // server, etc.). Fail loudly rather than commit a file with no cues.
+  if (ways.size === 0) throw new Error(`${id}: Overpass returned no roads — try again later`);
 
   const cues = deriveTurnCues(route.track, route.distances, [...ways.values()]);
   const pois = deriveStores(route.track, [...stores.values()], { maxOffRouteMeters: STORE_RADIUS_METERS });
