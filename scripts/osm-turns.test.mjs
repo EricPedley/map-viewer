@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveTurnCues, deriveStores, simplifyTrack, describeWay, makeProjector } from './osm-turns.mjs';
+import { deriveTurnCues, deriveSideRoads, deriveStores, simplifyTrack, describeWay, makeProjector } from './osm-turns.mjs';
 
 // Synthetic world: coordinates are meters east/north of a fixed origin.
 const ORIGIN = [33.0, -117.0];
@@ -157,4 +157,71 @@ test('stores: keeps nearby convenience stores + gas, drops far/other, dedupes', 
   assert.match(circleK.desc, /Hours: 24\/7/);
   assert.equal(stores.find((s) => s.name === 'Shell').category, 'fuel');
   assert.match(stores.find((s) => s.name === 'Shell').desc, /^On route/);
+});
+
+// ---------- side roads ----------
+
+const stubLen = (stub) => stub.reduce((sum, p, i) => {
+  if (i === 0) return 0;
+  return sum + Math.hypot((p[0] - stub[i - 1][0]) * 111320, (p[1] - stub[i - 1][1]) * 111320 * Math.cos(ORIGIN[0] * Math.PI / 180));
+}, 0);
+
+test('side roads: cross streets at each intersection, not the route\'s own road', () => {
+  // Straight east along Main St (y=0): Oak St crosses at x=100, 200, 300.
+  const { track } = makeTrack([[0, 0], [400, 0]]);
+  const stubs = deriveSideRoads(track, gridWays());
+  assert.equal(stubs.length, 3);
+  for (const stub of stubs) {
+    // Heads south from the junction and ends at the next junction, 100 m on.
+    assert.ok(stub[stub.length - 1][0] < stub[0][0], 'stub should run south');
+    assert.ok(Math.abs(stubLen(stub) - 100) < 3, `stub length ${stubLen(stub)}`);
+  }
+});
+
+test('side roads: stubs are clipped to the length limit', () => {
+  const ways = [
+    way({ name: 'Main St' }, [1, 0, 0], [2, 200, 0], [3, 400, 0]),
+    way({ name: 'Long Rd' }, [2, 200, 0], [4, 200, -1000]),
+  ];
+  const { track } = makeTrack([[0, 0], [400, 0]]);
+  const stubs = deriveSideRoads(track, ways, { lengthMeters: 150 });
+  assert.equal(stubs.length, 1);
+  assert.ok(Math.abs(stubLen(stubs[0]) - 150) < 3, `stub length ${stubLen(stubs[0])}`);
+});
+
+test('side roads: the road the route turns onto is not a side road, the one it leaves behind is', () => {
+  // Route east on Main to x=200 then south on Oak. At the corner the untaken
+  // arms are Main St continuing east (one stub); Oak north doesn't exist.
+  const ways = [
+    way({ name: 'Main St' }, [1, 0, 0], [2, 200, 0], [3, 400, 0]),
+    way({ name: 'Oak St' }, [2, 200, 0], [4, 200, -300]),
+  ];
+  const { track } = makeTrack([[0, 0], [200, 0], [200, -300]]);
+  const stubs = deriveSideRoads(track, ways);
+  assert.equal(stubs.length, 1);
+  const end = stubs[0][stubs[0].length - 1];
+  const [lat, lon] = toLL(400, 0);
+  assert.ok(Math.abs(end[0] - lat) < 1e-4 && Math.abs(end[1] - lon) < 1e-4, 'stub should run east to x=400');
+});
+
+test('side roads: a shallow fork keeps the untaken branch', () => {
+  const ways = [
+    way({ name: 'Stem Rd' }, [1, 0, 0], [2, 0, 200]),
+    way({ name: 'Left Branch' }, [2, 0, 200], [3, -35, 400]),
+    way({ name: 'Right Branch' }, [2, 0, 200], [4, 35, 400]),
+  ];
+  const { track } = makeTrack([[0, 0], [0, 200], [35, 400]]);
+  const stubs = deriveSideRoads(track, ways);
+  assert.equal(stubs.length, 1);
+  assert.ok(stubs[0][stubs[0].length - 1][1] < stubs[0][0][1], 'stub should head west (the Left Branch)');
+});
+
+test('side roads: roundabout rings and unroutable ways are ignored', () => {
+  const ways = [
+    way({ name: 'Main St' }, [1, 0, 0], [2, 200, 0], [3, 400, 0]),
+    way({ highway: 'footway' }, [2, 200, 0], [4, 200, -150]),
+    way({ highway: 'residential', service: undefined, access: 'private' }, [2, 200, 0], [5, 200, 150]),
+  ];
+  const { track } = makeTrack([[0, 0], [400, 0]]);
+  assert.deepEqual(deriveSideRoads(track, ways), []);
 });

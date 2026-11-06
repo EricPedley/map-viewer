@@ -27,6 +27,7 @@
     <div id="top-bar">
       <button id="btn-routes" class="chip chip-route" aria-label="Choose a route">🗺️ Routes</button>
       <button id="btn-pois" class="chip" aria-label="Points of interest">📍 POIs</button>
+      <button id="btn-cues" class="chip" aria-label="Cue sheet">📋 Cues</button>
       <button id="btn-elevation" class="chip" aria-label="Elevation profile">⛰️ Elevation</button>
       <button id="btn-offline" class="chip" aria-label="Offline downloads">⬇️ Offline</button>
       <button id="btn-locate" class="chip" aria-label="Show my location">🧭 Locate</button>
@@ -56,6 +57,15 @@
       <p id="poi-subtitle" class="panel-note"></p>
       <div id="poi-filters"></div>
       <ul id="poi-list"></ul>
+    </div>
+
+    <div id="panel-cues" class="panel" hidden>
+      <div class="panel-header">
+        <h2>Cue sheet</h2>
+        <button class="panel-close" data-close="panel-cues">✕</button>
+      </div>
+      <p id="cue-subtitle" class="panel-note"></p>
+      <ul id="cue-list"></ul>
     </div>
 
     <div id="panel-elevation" class="panel panel-bottom" hidden>

@@ -50,11 +50,13 @@ for (const file of readdirSync(fitDir).filter((f) => f.toLowerCase().endsWith('.
   // (scripts/fetch-osm.mjs). Optional: without it the route simply has no
   // cues and only its own course points.
   let cues = [];
+  let sideRoads = [];
   const osmFile = path.join(OSM_DIR, `${id}.json`);
   if (existsSync(osmFile)) {
     const osm = JSON.parse(readFileSync(osmFile, 'utf-8'));
     if (osm.trackHash === trackHash(track)) {
       cues = osm.cues;
+      sideRoads = osm.sideRoads ?? [];
       pois.push(...osm.stores);
     } else {
       console.warn(`${id}: source-data/osm/${id}.json is for a different track — ignoring it (rerun npm run fetch-osm)`);
@@ -69,5 +71,6 @@ for (const file of readdirSync(fitDir).filter((f) => f.toLowerCase().endsWith('.
     ...trackStats(track),
     pois,
     cues,
+    sideRoads,
   });
 }

@@ -176,6 +176,7 @@ function edgesAt(j, nodes) {
       cur = nodes.get(nextId);
     }
     edges.push({
+      nbrId,
       way,
       bearing: bearing(cur.x - j.x, cur.y - j.y),
       roundabout: way.tags.junction === 'roundabout',
@@ -388,6 +389,155 @@ export function deriveTurnCues(track, distances, ways) {
     instruction: c.instruction,
     dist: Math.round(c.s),
   }));
+}
+
+// ---------- side roads ----------
+// The roads that branch off the route at its junctions but that the route
+// doesn't use, clipped to a short stub so the map shows what's at each
+// intersection without drawing the whole road network.
+
+const SIDE_ROAD_LENGTH_METERS = 250;
+// A stub counts as "the route's own road" if all of it stays this close to the
+// track. Wide enough for GPS/OSM offset, narrow enough that a shallow fork
+// (which drifts away from the route within a couple hundred meters) is kept.
+const ON_ROUTE_METERS = 12;
+const MIN_ON_ROUTE_CHECK_METERS = 20; // ignore the first bit, which is always near the junction
+
+/**
+ * @returns {[number, number][][]} polylines of [lat, lon] (5 decimals ≈ 1 m)
+ */
+export function deriveSideRoads(track, ways, { lengthMeters = SIDE_ROAD_LENGTH_METERS } = {}) {
+  const proj = makeProjector(track);
+  const pts = track.map(([lat, lon]) => proj.toXY(lat, lon));
+  const segIndex = buildSegmentIndex(pts, 40);
+  const nodes = buildGraph(ways, proj);
+
+  // Distance from (x, y) to the route; Infinity when nothing is nearby.
+  const distToRoute = (x, y) => {
+    let best = Infinity;
+    for (const i of segIndex.near(x, y)) {
+      best = Math.min(best, segmentDistance(x, y, pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]).dist);
+    }
+    return best;
+  };
+
+  // Cumulative distance along the route, for "the route's heading ~25 m
+  // before/after this junction".
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const total = cum[cum.length - 1];
+  const pointAt = (s) => {
+    const target = Math.max(0, Math.min(total, s));
+    let lo = 0;
+    let hi = cum.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (cum[mid] < target) lo = mid + 1;
+      else hi = mid;
+    }
+    if (lo === 0) return pts[0];
+    const span = cum[lo] - cum[lo - 1] || 1;
+    const t = (target - cum[lo - 1]) / span;
+    return [pts[lo - 1][0] + t * (pts[lo][0] - pts[lo - 1][0]), pts[lo - 1][1] + t * (pts[lo][1] - pts[lo - 1][1])];
+  };
+
+  const seen = new Set();
+  const out = [];
+
+  for (const j of nodes.values()) {
+    if (j.nbrs.size < 3 || distToRoute(j.x, j.y) > MAX_JUNCTION_SNAP_METERS) continue;
+
+    // Where the route passes this junction (possibly more than once).
+    const hits = [];
+    for (const i of segIndex.near(j.x, j.y)) {
+      const { dist, t } = segmentDistance(j.x, j.y, pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
+      if (dist <= MAX_JUNCTION_SNAP_METERS) hits.push({ s: cum[i] + t * (cum[i + 1] - cum[i]), dist });
+    }
+    hits.sort((a, b) => a.s - b.s);
+    const passes = [];
+    let cluster = [];
+    const flush = () => {
+      if (cluster.length) passes.push(cluster.reduce((a, b) => (b.dist < a.dist ? b : a)).s);
+      cluster = [];
+    };
+    for (const h of hits) {
+      if (cluster.length && h.s - cluster[cluster.length - 1].s > 40) flush();
+      cluster.push(h);
+    }
+    flush();
+
+    // The roads the route itself uses here: the arm it arrives on and the arm
+    // it leaves on, matched by compass bearing. Everything else is a side road.
+    const edges = edgesAt(j, nodes);
+    const nearestEdge = (target) =>
+      edges.reduce((a, b) => (Math.abs(angleDiff(b.bearing, target)) < Math.abs(angleDiff(a.bearing, target)) ? b : a));
+    const routeArms = new Set();
+    for (const s of passes) {
+      const p = pointAt(s);
+      if (s >= LOOKAROUND_METERS) {
+        const before = pointAt(s - LOOKAROUND_METERS);
+        routeArms.add(nearestEdge((bearing(p[0] - before[0], p[1] - before[1]) + 180) % 360).nbrId);
+      }
+      if (s <= total - LOOKAROUND_METERS) {
+        const after = pointAt(s + LOOKAROUND_METERS);
+        routeArms.add(nearestEdge(bearing(after[0] - p[0], after[1] - p[1])).nbrId);
+      }
+    }
+
+    for (const [firstId, firstWay] of j.nbrs) {
+      if (routeArms.has(firstId) || firstWay.tags.junction === 'roundabout' || seen.has(`${j.id}>${firstId}`)) continue;
+
+      // Walk out along the road through plain mid-road nodes, stopping at the
+      // length limit, the next junction, or a dead end.
+      const stub = [j];
+      let length = 0;
+      let prev = j;
+      let cur = nodes.get(firstId);
+      const visited = new Set([j.id]);
+      while (cur) {
+        const step = Math.hypot(cur.x - prev.x, cur.y - prev.y);
+        if (length + step > lengthMeters) {
+          const t = (lengthMeters - length) / step;
+          stub.push({ lat: prev.lat + t * (cur.lat - prev.lat), lon: prev.lon + t * (cur.lon - prev.lon), x: prev.x + t * (cur.x - prev.x), y: prev.y + t * (cur.y - prev.y) });
+          length = lengthMeters;
+          break;
+        }
+        length += step;
+        stub.push(cur);
+        if (cur.nbrs.size !== 2 || visited.has(cur.id)) break;
+        visited.add(cur.id);
+        const nextId = [...cur.nbrs.keys()].find((id) => id !== prev.id);
+        prev = cur;
+        cur = nodes.get(nextId);
+      }
+      if (stub.length < 2) continue;
+
+      // Mark this edge (and the same stub seen from its far end) as handled.
+      seen.add(`${j.id}>${firstId}`);
+      const last = stub[stub.length - 1];
+      const beforeLast = stub[stub.length - 2];
+      if (last.id != null && beforeLast.id != null) seen.add(`${last.id}>${beforeLast.id}`);
+
+      // Skip the route's own road: every point past the first few meters hugs the track.
+      let walked = 0;
+      let onRoute = true;
+      let checked = false;
+      for (let k = 1; k < stub.length; k++) {
+        walked += Math.hypot(stub[k].x - stub[k - 1].x, stub[k].y - stub[k - 1].y);
+        if (walked >= MIN_ON_ROUTE_CHECK_METERS || k === stub.length - 1) {
+          checked = true;
+          if (distToRoute(stub[k].x, stub[k].y) > ON_ROUTE_METERS) {
+            onRoute = false;
+            break;
+          }
+        }
+      }
+      if (!checked || onRoute) continue;
+
+      out.push(stub.map((n) => [Math.round(n.lat * 1e5) / 1e5, Math.round(n.lon * 1e5) / 1e5]));
+    }
+  }
+  return out;
 }
 
 // ---------- convenience stores ----------

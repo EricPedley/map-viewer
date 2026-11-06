@@ -69,6 +69,12 @@ function poiDivIcon(cat) {
 function drawRoute() {
   routeLayer.clearLayers();
 
+  // Roads that branch off at the route's intersections but aren't on it:
+  // dashed gray stubs, added first so the track draws on top of them.
+  for (const line of route.sideRoads ?? []) {
+    L.polyline(line, { color: '#9aa0a6', weight: 2, opacity: 0.85, dashArray: '5 6', interactive: false }).addTo(routeLayer);
+  }
+
   // Track colored by grade (blue descents -> white flat -> red climbs)
   // instead of one flat color — drawn as one polyline per grade segment,
   // following the actual recorded path between each segment's endpoints
@@ -137,7 +143,7 @@ function showHoverAt(idx) {
 }
 
 // ---------- Panels ----------
-const panels = ['panel-routes', 'panel-pois', 'panel-elevation', 'panel-offline'];
+const panels = ['panel-routes', 'panel-pois', 'panel-cues', 'panel-elevation', 'panel-offline'];
 // The top bar wraps to a variable number of rows depending on screen width,
 // so top-anchored panels are positioned from its actual rendered height
 // instead of a fixed offset (otherwise they cover the buttons).
@@ -164,6 +170,12 @@ document.getElementById('btn-routes').addEventListener('click', () => {
 document.getElementById('btn-pois').addEventListener('click', () => {
   const el = document.getElementById('panel-pois');
   el.hidden ? openPanel('panel-pois') : closeAllPanels();
+});
+document.getElementById('btn-cues').addEventListener('click', () => {
+  const el = document.getElementById('panel-cues');
+  if (!el.hidden) return closeAllPanels();
+  openPanel('panel-cues');
+  scrollCueListToNext();
 });
 document.getElementById('btn-elevation').addEventListener('click', () => {
   const el = document.getElementById('panel-elevation');
@@ -264,6 +276,65 @@ function renderPoiListItems() {
   }
 }
 
+
+// ---------- Cue sheet ----------
+// Rows are built once per route; position updates only touch the text and
+// classes in place so the list doesn't lose its scroll position mid-ride.
+const cueList = document.getElementById('cue-list');
+const cueSubtitle = document.getElementById('cue-subtitle');
+let cueRows = []; // { li, aheadEl, dist } in route order
+
+function renderCueList() {
+  cueList.innerHTML = '';
+  cueRows = [];
+  const items = route.cues
+    .map((cue, i) => ({ cue, dist: cueRouteDistance[i] }))
+    .sort((a, b) => a.dist - b.dist);
+
+  for (const { cue, dist } of items) {
+    const li = document.createElement('li');
+    li.innerHTML =
+      `<span class="cue-icon">${CUE_ICONS[cue.direction] ?? '⬆️'}</span>` +
+      `<span class="cue-text">${escapeHtml(cue.instruction)}</span>` +
+      `<span class="cue-nums"><span class="cue-ahead"></span>` +
+      `<span class="cue-mile">mile ${metersToMiles(dist).toFixed(1)}</span></span>`;
+    li.addEventListener('click', () => {
+      map.setView([cue.lat, cue.lon], 16);
+      closeAllPanels();
+    });
+    cueList.appendChild(li);
+    cueRows.push({ li, aheadEl: li.querySelector('.cue-ahead'), dist });
+  }
+  updateCueList();
+}
+
+function updateCueList() {
+  const tracking = currentMileageMeters != null;
+  if (route.cues.length === 0) {
+    cueSubtitle.textContent = 'This route has no turn cues';
+    return;
+  }
+  const total = metersToMiles(route.totalDistanceMeters).toFixed(1);
+  cueSubtitle.textContent = tracking
+    ? `${route.cues.length} turns · You're at mile ${metersToMiles(currentMileageMeters).toFixed(1)} of ${total}`
+    : `${route.cues.length} turns · ${total} mi total`;
+
+  let nextFound = false;
+  for (const row of cueRows) {
+    const passed = tracking && row.dist < currentMileageMeters;
+    const isNext = tracking && !passed && !nextFound;
+    if (isNext) nextFound = true;
+    row.li.classList.toggle('passed', passed);
+    row.li.classList.toggle('next', isNext);
+    row.aheadEl.textContent =
+      tracking && !passed ? `${metersToMiles(row.dist - currentMileageMeters).toFixed(1)} mi` : '';
+  }
+}
+
+function scrollCueListToNext() {
+  const next = cueList.querySelector('li.next');
+  if (next) next.scrollIntoView({ block: 'start' });
+}
 
 // ---------- Elevation profile ----------
 function renderElevation() {
@@ -486,6 +557,7 @@ const locationTracker = createLocationTracker(map, {
       if (currentMileageMeters != null) {
         currentMileageMeters = null;
         renderPoiListItems();
+        updateCueList();
       }
     }
   },
@@ -498,6 +570,7 @@ const locationTracker = createLocationTracker(map, {
       currentMileageMeters ?? 0
     );
     renderPoiListItems();
+    updateCueList();
     updateNavBanner();
     if (followMode.isActive()) followMode.updatePosition(lat, lon, locationTracker.getHeading());
   },
@@ -614,6 +687,7 @@ async function selectRoute(id, { fit = true } = {}) {
     ? nearestRouteDistanceMeters(route.track, route.distances, here.lat, here.lng)
     : null;
   renderPoiListItems();
+  renderCueList();
   updateNavBanner();
 }
 

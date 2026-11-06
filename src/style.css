@@ -285,6 +285,43 @@ html, body {
 
 #poi-list li:hover { background: rgba(255, 255, 255, 0.04); }
 
+/* ---------- Cue sheet ---------- */
+#cue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#cue-list li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#cue-list li:hover { background: rgba(255, 255, 255, 0.04); }
+#cue-list li.passed { opacity: 0.4; }
+#cue-list li.next {
+  background: rgba(255, 90, 31, 0.15);
+  border-left: 3px solid var(--accent);
+}
+
+.cue-icon { flex: 0 0 auto; font-size: 18px; }
+.cue-text { flex: 1 1 auto; }
+.cue-nums {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cue-ahead { color: var(--text); font-weight: 600; font-size: 13px; }
+
 .poi-name { flex: 1 1 auto; }
 .poi-dist {
   flex: 0 0 auto;

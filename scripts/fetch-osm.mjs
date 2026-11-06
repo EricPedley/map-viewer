@@ -16,7 +16,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { deriveStores, deriveTurnCues, simplifyTrack } from './osm-turns.mjs';
+import { deriveSideRoads, deriveStores, deriveTurnCues, simplifyTrack } from './osm-turns.mjs';
 import { OSM_DIR, ROUTES_OUT_DIR, trackHash } from './route-utils.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -92,7 +92,9 @@ async function processRoute(id, force) {
   const hash = trackHash(route.track);
   const outFile = path.join(OSM_DIR, `${id}.json`);
 
-  if (!force && existsSync(outFile) && JSON.parse(readFileSync(outFile, 'utf-8')).trackHash === hash) {
+  // Files written before side roads existed lack that field: refetch those too.
+  const existing = existsSync(outFile) ? JSON.parse(readFileSync(outFile, 'utf-8')) : null;
+  if (!force && existing && existing.trackHash === hash && existing.sideRoads) {
     console.log(`${id}: up to date (use --force to refetch)`);
     return;
   }
@@ -125,8 +127,9 @@ async function processRoute(id, force) {
   if (ways.size === 0) throw new Error(`${id}: Overpass returned no roads — try again later`);
 
   const cues = deriveTurnCues(route.track, route.distances, [...ways.values()]);
+  const sideRoads = deriveSideRoads(route.track, [...ways.values()]);
   const pois = deriveStores(route.track, [...stores.values()], { maxOffRouteMeters: STORE_RADIUS_METERS });
-  console.log(`  ${ways.size} roads -> ${cues.length} turn cues; ${stores.size} candidates -> ${pois.length} stores`);
+  console.log(`  ${ways.size} roads -> ${cues.length} turn cues, ${sideRoads.length} side roads; ${stores.size} candidates -> ${pois.length} stores`);
 
   mkdirSync(OSM_DIR, { recursive: true });
   writeFileSync(
@@ -137,6 +140,7 @@ async function processRoute(id, force) {
         trackHash: hash,
         source: '© OpenStreetMap contributors (ODbL), via the Overpass API',
         cues,
+        sideRoads,
         stores: pois,
       },
       null,
